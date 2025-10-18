@@ -1,0 +1,39 @@
+{
+  "name": "op1-tables.com",
+  "version": "1.0.0",
+  "private": true,
+  "description": "User interface to probe 8-piece op1 tablebase and statistics",
+  "keywords": [
+    "op1",
+    "chess",
+    "endgame",
+    "tablebase"
+  ],
+  "homepage": "https://op1-tables.com",
+  "bugs": {
+    "url": "https://github.com/niklasf/op1-tables.com/issues",
+    "email": "niklas.fiekas@backscattering.de"
+  },
+  "license": "AGPL-3.0-or-later",
+  "author": {
+    "name": "Niklas Fiekas",
+    "email": "niklas.fiekas@backscattering.de"
+  },
+  "repository": "https://github.com/niklasf/op1-tables.com",
+  "dependencies": {
+    "@badrap/result": "^0.3.1",
+    "chessground": "^9.2.1",
+    "chessops": "^0.15.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.11",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "prepare": "$npm_execpath run build-js",
+    "build-js": "tsc -noEmit && esbuild --bundle src/main.ts --minify --sourcemap --outfile=dist/main.min.js --target=es2018,chrome105,edge91,firefox67,opera55,safari11",
+    "format": "prettier --write .",
+    "check-format": "prettier --check ."
+  }
+}

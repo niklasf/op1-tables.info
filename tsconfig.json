@@ -1,0 +1,17 @@
+{
+  "include": ["src/*.ts"],
+  "compilerOptions": {
+    "noEmitOnError": false,
+    "target": "ES2018",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "lib": ["ES2018", "DOM", "DOM.iterable"],
+    "alwaysStrict": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedParameters": true
+  }
+}
