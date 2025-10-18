@@ -18,4 +18,6 @@ export function start(element: Element) {
   redraw();
 }
 
-start(document.getElementById('main')!);
+window.addEventListener('DOMContentLoaded', () => {
+  start(document.getElementById('main')!);
+});
