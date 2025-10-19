@@ -2,7 +2,7 @@
   "include": ["src/*.ts"],
   "compilerOptions": {
     "noEmitOnError": false,
-    "target": "ES2018",
+    "target": "ES2019",
     "module": "esnext",
     "moduleResolution": "node",
     "lib": ["ES2018", "DOM", "DOM.iterable"],

@@ -33,9 +33,9 @@
   },
   "scripts": {
     "prepare": "$npm_execpath run build-js && $npm_execpath run build-css",
-    "build-js": "tsc -noEmit && esbuild --bundle src/main.ts --minify --sourcemap --outfile=dist/main.min.js --target=es2018,chrome105,edge91,firefox67,opera55,safari11",
+    "build-js": "tsc -noEmit && esbuild --bundle src/main.ts --minify --sourcemap --outfile=dist/main.min.js --target=es2019,chrome105,edge91,firefox67,opera55,safari11",
     "build-css": "esbuild --bundle css/style.css --minify --sourcemap --outfile=dist/style.min.css --target=chrome105,edge91,firefox67,opera55,safari11",
-    "watch-js": "tsc -noEmit && esbuild --bundle src/main.ts --minify --sourcemap --outfile=dist/main.min.js --target=es2018,chrome105,edge91,firefox67,opera55,safari11 --watch",
+    "watch-js": "tsc -noEmit && esbuild --bundle src/main.ts --minify --sourcemap --outfile=dist/main.min.js --target=es2019,chrome105,edge91,firefox67,opera55,safari11 --watch",
     "watch-css": "esbuild --bundle css/style.css --minify --sourcemap --outfile=dist/style.min.css --target=chrome105,edge91,firefox67,opera55,safari11 --watch",
     "format": "prettier --write .",
     "check-format": "prettier --check ."
