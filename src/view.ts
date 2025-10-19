@@ -22,7 +22,7 @@ export const view = (ctrl: Ctrl): VNode => {
           insert: vnode =>
             ctrl.setGround(
               makeChessground(vnode.elm as HTMLElement, {
-                fen: ctrl.getBoardFen(),
+                fen: DEFAULT_FEN,
                 autoCastle: false,
                 trustAllEvents: true,
                 movable: {

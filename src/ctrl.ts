@@ -9,13 +9,21 @@ import { Result } from '@badrap/result';
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
 export class Ctrl {
-  public setup: Setup = parseFen(DEFAULT_FEN).unwrap();
+  public setup: Setup;
   public lastMove: Move | undefined;
-  public editMode: boolean = false;
+  public editMode = false;
 
   private ground: CgApi | undefined;
 
   constructor(private readonly redraw: () => void) {
+    const fen = new URLSearchParams(location.search).get('fen');
+    this.setup = (fen ? Result.ok(fen) : Result.err(new FenError(InvalidFen.Fen)))
+      .chain(fen => parseFen(fen.replace(/_/g, ' ')))
+      .unwrap(
+        setup => setup,
+        _ => parseFen(DEFAULT_FEN).unwrap(),
+      );
+
     window.addEventListener('popstate', event => {
       const fen = event.state?.fen || new URLSearchParams(location.search).get('fen');
       const setup = (fen ? Result.ok(fen) : Result.err(new FenError(InvalidFen.Fen)))
@@ -33,9 +41,10 @@ export class Ctrl {
       this.ground.destroy();
     }
     this.ground = ground;
+    this.updateGround();
   }
 
-  withGround<T>(f: (ground: CgApi) => T): T | undefined {
+  private withGround<T>(f: (ground: CgApi) => T): T | undefined {
     return this.ground && f(this.ground);
   }
 
@@ -43,12 +52,18 @@ export class Ctrl {
     if (setupEquals(this.setup, setup)) return false;
     this.setup = setup;
     this.lastMove = lastMove;
-    const pos = Chess.fromSetup(setup);
+    this.updateGround();
+    this.redraw();
+    return true;
+  }
+
+  private updateGround() {
+    const pos = Chess.fromSetup(this.setup);
     this.withGround(ground =>
       ground.set({
         lastMove: this.getLastMove(),
         fen: this.getBoardFen(),
-        turnColor: setup.turn,
+        turnColor: this.setup.turn,
         check: pos.unwrap(
           p => p.isCheck() && p.turn,
           _ => false,
@@ -58,8 +73,6 @@ export class Ctrl {
         },
       }),
     );
-    this.redraw();
-    return true;
   }
 
   push(setup: Setup, lastMove?: Move) {
