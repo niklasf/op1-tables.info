@@ -1,6 +1,8 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Setup, Board, Piece, SquareSet, Move, SquareName, parseSquare, Role, makeSquare } from 'chessops';
-import { FenError, makeFen, parseBoardFen, parseFen, InvalidFen, makeBoardFen } from 'chessops/fen';
+import { Piece, Move, SquareName } from 'chessops/types';
+import { Setup } from 'chessops/setup';
+import { parseSquare } from 'chessops/util';
+import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';

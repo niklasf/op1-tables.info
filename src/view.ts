@@ -97,17 +97,22 @@ export const view = (ctrl: Ctrl): VNode => {
 const sparePieces = (ctrl: Ctrl, color: Color): VNode => {
   return h(
     `div.spare.${color == 'white' ? 'bottom' : 'top'}`,
-    ROLES.map(role =>
-      h(
-        `piece.${role}.${color}`,
-        {
-          on: {
-            touchstart: e => ctrl.onSpareMouseDown(e, { color, role }),
-            mousedown: e => ctrl.onSpareMouseDown(e, { color, role }),
+    ROLES.reduce(
+      (acc, role) => [
+        ...acc,
+        h(
+          `piece.${role}.${color}`,
+          {
+            on: {
+              touchstart: e => ctrl.onSpareMouseDown(e, { color, role }),
+              mousedown: e => ctrl.onSpareMouseDown(e, { color, role }),
+            },
           },
-        },
-        [],
-      ),
+          [],
+        ),
+        ' ',
+      ],
+      [],
     ),
   );
 };
