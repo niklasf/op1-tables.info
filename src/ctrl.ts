@@ -7,11 +7,17 @@ import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
 import { Result } from '@badrap/result';
+import { Sync, sync } from './sync.js';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
 export const relaxedParseFen = (fen: string | null | undefined): Result<Setup, FenError> =>
   parseFen(fen?.trim().replace(/_/g, ' ') || DEFAULT_FEN);
+
+export interface TablebaseResponse {
+  moves: LilaTablebaseMove[];
+  error?: string;
+}
 
 export class Ctrl {
   public setup: Setup;
@@ -20,11 +26,16 @@ export class Ctrl {
 
   private ground: CgApi | undefined;
 
+  private abortController: AbortController | undefined;
+  public tablebaseResponse: Sync<TablebaseResponse>;
+
   constructor(private readonly redraw: () => void) {
     this.setup = relaxedParseFen(new URLSearchParams(location.search).get('fen')).unwrap(
       setup => setup,
       _ => parseFen(DEFAULT_FEN).unwrap(),
     );
+    this.tablebaseResponse = sync(this.fetchTablebase());
+    this.tablebaseResponse.promise.finally(() => this.redraw());
 
     window.addEventListener('popstate', event => {
       this.setPosition(
@@ -54,6 +65,8 @@ export class Ctrl {
     this.setup = setup;
     this.lastMove = lastMove;
     this.updateGround();
+    this.tablebaseResponse = sync(this.fetchTablebase());
+    this.tablebaseResponse.promise.finally(() => this.redraw());
     this.redraw();
     return true;
   }
@@ -147,5 +160,20 @@ export class Ctrl {
 
   wantsReducedMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  async fetchTablebase(): Promise<TablebaseResponse> {
+    this.abortController?.abort();
+    this.abortController = new AbortController();
+
+    const url = new URL('/standard', 'https://tablebase.lichess.ovh');
+    url.searchParams.set('fen', this.getFen());
+    url.searchParams.set('op1', 'always');
+    const res = await fetch(url.href, { signal: this.abortController.signal });
+    if (!res.ok) {
+      return { moves: [], error: `Failed to fetch tablebase: ${res.status}` };
+    }
+    const json: LilaTablebaseResponse = await res.json();
+    return { moves: json.moves, error: 'Implementation in progress' };
   }
 }

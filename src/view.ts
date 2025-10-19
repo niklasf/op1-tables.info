@@ -90,7 +90,13 @@ export const view = (ctrl: Ctrl): VNode => {
         ],
       ),
     ],
-    h('div'),
+    h(
+      'div',
+      ctrl.tablebaseResponse.sync
+        ? [ctrl.tablebaseResponse.sync.error,
+          ...ctrl.tablebaseResponse.sync.moves.map(move => h('div', move.san))]
+        : 'Loading ...',
+    ),
   );
 };
 
