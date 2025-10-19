@@ -60,6 +60,7 @@ export class Ctrl {
 
     new Mousetrap()
       .bind('f', () => this.toggleFlipped())
+      .bind('e', () => this.toggleEditMode())
       .bind('space', () =>
         this.tablebaseResponse.promise.then(
           response => response.moves.length && this.pushMove(parseUci(response.moves[0].uci)!),

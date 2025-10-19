@@ -22,7 +22,10 @@ export const view = (ctrl: Ctrl): VNode => {
         'div.btn-group',
         h(
           `button.btn${ctrl.editMode ? '.active' : ''}`,
-          { attrs: { title: 'Edit mode: ...' }, on: { click: () => ctrl.toggleEditMode() } },
+          {
+            attrs: { title: 'Edit mode: Do not switch sides when playing moves on the board (e)' },
+            on: { click: () => ctrl.toggleEditMode() },
+          },
           ctrl.editMode ? 'E' : 'e',
         ),
       ),
@@ -63,7 +66,10 @@ export const view = (ctrl: Ctrl): VNode => {
         },
       }),
       sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
-      h('div.btn-group', h('button.btn', {attrs: {title: 'Flip board (f)'}, on: {click: () => ctrl.toggleFlipped()}}, 'F')),
+      h(
+        'div.btn-group',
+        h('button.btn', { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } }, 'F'),
+      ),
       h(
         'form',
         {
