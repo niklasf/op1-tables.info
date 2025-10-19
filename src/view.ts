@@ -53,30 +53,42 @@ export const view = (ctrl: Ctrl): VNode => {
         },
       }),
       sparePieces(ctrl, 'white'),
-      h('form', [
-        h('input', {
-          attrs: {
-            type: 'text',
-            placeholder: DEFAULT_FEN,
-            name: 'fen',
-          },
-          props: {
-            value: ctrl.getFen() == DEFAULT_FEN ? '' : ctrl.getFen(),
-          },
+      h(
+        'form',
+        {
           on: {
-            change: e => {
-              const input = e.target as HTMLInputElement;
-              input.setCustomValidity(
-                relaxedParseFen(input.value).unwrap(
-                  _ => '',
-                  _ => 'Invalid FEN',
-                ),
-              );
+            submit: e => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              relaxedParseFen(formData.get('fen') as string).map(setup => ctrl.push(setup));
             },
           },
-        }),
-        h('button', { attrs: { type: 'submit' } }, 'Set FEN'),
-      ]),
+        },
+        [
+          h('input', {
+            attrs: {
+              type: 'text',
+              placeholder: DEFAULT_FEN,
+              name: 'fen',
+            },
+            props: {
+              value: ctrl.getFen() == DEFAULT_FEN ? '' : ctrl.getFen(),
+            },
+            on: {
+              change: e => {
+                const input = e.target as HTMLInputElement;
+                input.setCustomValidity(
+                  relaxedParseFen(input.value).unwrap(
+                    _ => '',
+                    _ => 'Invalid FEN',
+                  ),
+                );
+              },
+            },
+          }),
+          h('button', { attrs: { type: 'submit' } }, 'Set FEN'),
+        ],
+      ),
     ],
     h('div'),
   );
