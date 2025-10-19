@@ -8,6 +8,7 @@ import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
 import { Result } from '@badrap/result';
 import { Sync, sync } from './sync.js';
+import { Mousetrap } from './mousetrap.js';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
@@ -28,6 +29,7 @@ export class Ctrl {
   public setup: Setup;
   public lastMove: Move | undefined;
   public editMode = false;
+  public flipped = false;
 
   private ground: CgApi | undefined;
 
@@ -51,6 +53,14 @@ export class Ctrl {
         event.state?.lastMove,
       );
     });
+
+    new Mousetrap().bind('f', () => this.setFlipped(!this.flipped));
+  }
+
+  setFlipped(flipped: boolean) {
+    this.flipped = flipped;
+    this.updateGround();
+    this.redraw();
   }
 
   setGround(ground: CgApi | undefined) {
@@ -90,6 +100,7 @@ export class Ctrl {
         movable: {
           dests: pos.unwrap(chessgroundDests, _ => undefined),
         },
+        orientation: this.flipped ? 'black' : 'white',
       });
     });
   }
