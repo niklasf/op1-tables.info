@@ -95,34 +95,37 @@ export const view = (ctrl: Ctrl): VNode => {
       ctrl.tablebaseResponse.sync
         ? [
             ctrl.tablebaseResponse.sync.error,
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'win', ctrl.setup.turn),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'draw', ctrl.setup.turn),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'loss', opposite(ctrl.setup.turn)),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['loss', 'syzygy-loss', 'maybe-loss', 'blessed-loss'], ctrl.setup.turn),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['unknown'], undefined),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['draw'], undefined),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['cursed-win', 'maybe-win', 'syzygy-win', 'win'], opposite(ctrl.setup.turn)),
           ]
         : 'Loading ...',
     ),
   );
 };
 
-const tablebaseMoves = (moves: LilaTablebaseMove[], category: LilaTablebaseCategory, winner: Color): VNode | undefined => {
-  moves = moves.filter(move => move.category === category);
+const tablebaseMoves = (moves: LilaTablebaseMove[], categories: LilaTablebaseCategory[], winner?: Color): VNode | undefined => {
+  moves = moves.filter(move => categories.includes(move.category));
   if (!moves.length) return;
+  moves.sort((a, b) => (a.dtc || 0) - (b.dtc || 0));
   return h(
     'div.moves',
     moves.map(move => {
       const badges = [];
+      if (move.category === 'unknown') badges.push(' ', h('span.unknown', 'Unknown'));
       if (move.checkmate) badges.push(' ', h(`span.${winner}`, 'Checkmate'));
       else if (move.stalemate) badges.push(' ', h('span.draw', 'Stalemate'));
       else if (move.insufficient_material) badges.push(' ', h('span.draw', 'Insufficient material'));
       else if (move.category === 'draw') badges.push(' ', h('span.draw', 'Draw'));
       else {
-        if (move.dtm) badges.push(' ', h(`span.${winner}`, `DTM ${move.dtm}`));
+        if (move.dtm) badges.push(' ', h(`span.${winner}`, `DTM ${Math.abs(move.dtm)}`));
         if (move.dtc)
           badges.push(
             ' ',
-            h(`span.${winner}`, move.san.includes('=') || move.san.includes('x') ? 'Conversion' : `DTC ${move.dtc}`),
+            h(`span.${winner}`, move.san.includes('=') || move.san.includes('x') ? 'Conversion' : `DTC ${Math.abs(move.dtc)}`),
           );
-        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${move.dtz}`));
+        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : [...dtz50(), ` ${Math.abs(move.dtz)}`]));
       }
       return h('a', [move.san, ...badges]);
     }),
@@ -160,7 +163,7 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
       h('div.inner', [
         h(
           'p',
-          "8-piece DTC via Marc Bourzutschky's op1 tables. 7-piece DTZ via Ronald de Man's Syzygy tables. API hosted by lichess.org.",
+          ["8-piece DTC via Marc Bourzutschky's op1 tables. 7-piece ", ...dtz50(), " via Ronald de Man's Syzygy tables. API hosted by lichess.org."],
         ),
         h('p', [
           h(
@@ -188,3 +191,5 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
     ]),
   ]);
 };
+
+const dtz50 = (): Array<string | VNode> => ['DTZ', h('sub', '50'), '′′'];
