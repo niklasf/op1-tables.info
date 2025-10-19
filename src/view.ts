@@ -20,17 +20,18 @@ export const view = (ctrl: Ctrl): VNode => {
       h('div.cg-wrap', {
         hook: {
           insert: vnode =>
-            ctrl.setChessground(
+            ctrl.setGround(
               makeChessground(vnode.elm as HTMLElement, {
                 fen: ctrl.getFen(),
+                lastMove: ctrl.getLastMove(),
                 events: {
-                  move: ctrl.onChessgroundMove.bind(ctrl),
-                  dropNewPiece: ctrl.onChessgroundDropNewPiece.bind(ctrl),
-                  change: ctrl.onChessgroundChange.bind(ctrl),
+                  move: ctrl.onCgMove.bind(ctrl),
+                  dropNewPiece: ctrl.onCgDropNewPiece.bind(ctrl),
+                  change: ctrl.onCgChange.bind(ctrl),
                 },
               }),
             ),
-          destroy: () => ctrl.setChessground(undefined),
+          destroy: () => ctrl.setGround(undefined),
         },
       }),
       sparePieces('white'),

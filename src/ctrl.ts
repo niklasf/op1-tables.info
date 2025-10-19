@@ -1,8 +1,10 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Setup, Board, Piece, SquareSet, Move, SquareName, parseSquare, Role } from 'chessops';
-import { makeFen, parseBoardFen, parseFen } from 'chessops/fen';
+import { Setup, Board, Piece, SquareSet, Move, SquareName, parseSquare, Role, makeSquare } from 'chessops';
+import { FenError, makeFen, parseBoardFen, parseFen, InvalidFen, makeBoardFen } from 'chessops/fen';
 import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
+import { chessgroundDests, chessgroundMove } from 'chessops/compat';
+import { Result } from '@badrap/result';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
@@ -11,21 +13,51 @@ export class Ctrl {
   public lastMove: Move | undefined;
   public editMode: boolean = false;
 
-  private chessground: CgApi | undefined;
+  private ground: CgApi | undefined;
 
-  constructor(private readonly redraw: () => void) {}
+  constructor(private readonly redraw: () => void) {
+    window.addEventListener('popstate', event => {
+      const fen = event.state?.fen || new URLSearchParams(location.search).get('fen');
+      const setup = (fen ? Result.ok(fen) : Result.err(new FenError(InvalidFen.Fen)))
+        .chain(fen => parseFen(fen.replace(/_/g, ' ')))
+        .unwrap(
+          setup => setup,
+          _ => parseFen(DEFAULT_FEN).unwrap(),
+        );
+      this.setPosition(setup, event.state?.lastMove);
+    });
+  }
 
-  setChessground(chessground: CgApi | undefined) {
-    if (this.chessground && chessground !== this.chessground) {
-      this.chessground.destroy();
+  setGround(ground: CgApi | undefined) {
+    if (this.ground && ground !== this.ground) {
+      this.ground.destroy();
     }
-    this.chessground = chessground;
+    this.ground = ground;
+  }
+
+  withGround<T>(f: (ground: CgApi) => T): T | undefined {
+    return this.ground && f(this.ground);
   }
 
   private setPosition(setup: Setup, lastMove?: Move): boolean {
     if (setupEquals(this.setup, setup)) return false;
     this.setup = setup;
     this.lastMove = lastMove;
+    const pos = Chess.fromSetup(setup);
+    this.withGround(ground =>
+      ground.set({
+        lastMove: this.getLastMove(),
+        fen: makeBoardFen(this.setup.board),
+        turnColor: setup.turn,
+        check: pos.unwrap(
+          p => p.isCheck() && p.turn,
+          _ => false,
+        ),
+        movable: {
+          dests: pos.unwrap(chessgroundDests, _ => undefined),
+        },
+      }),
+    );
     this.redraw();
     return true;
   }
@@ -53,7 +85,11 @@ export class Ctrl {
     return makeFen(this.setup);
   }
 
-  onChessgroundMove(from: SquareName, to: SquareName) {
+  getLastMove(): SquareName[] | undefined {
+    return this.lastMove && chessgroundMove(this.lastMove);
+  }
+
+  onCgMove(from: SquareName, to: SquareName) {
     if (!this.editMode)
       this.pushMove({
         from: parseSquare(from),
@@ -61,22 +97,26 @@ export class Ctrl {
       });
   }
 
-  onChessgroundDropNewPiece(piece: Piece, square: SquareName) {
+  onCgDropNewPiece(piece: Piece, square: SquareName) {
     if (piece.role === 'king') {
       // Move the existing king when dropping a new one.
-      const diff = new Map();
-      for (const [sq, p] of this.chessground!.state.pieces) {
-        if (p.role === 'king' && p.color == piece.color) diff.set(sq, undefined);
-      }
-      diff.set(square, piece);
-      this.chessground!.setPieces(diff);
+      this.withGround(ground => {
+        const diff = new Map();
+        for (const [sq, p] of ground.state.pieces) {
+          if (p.role === 'king' && p.color == piece.color) diff.set(sq, undefined);
+        }
+        diff.set(square, piece);
+        ground.setPieces(diff);
+      });
     }
   }
 
-  onChessgroundChange() {
-    this.push({
-      ...this.setup,
-      board: parseBoardFen(this.chessground!.getFen()).unwrap()
-    })
+  onCgChange() {
+    this.withGround(ground =>
+      this.push({
+        ...this.setup,
+        board: parseBoardFen(ground.getFen()).unwrap(),
+      }),
+    );
   }
 }
