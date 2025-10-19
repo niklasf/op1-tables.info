@@ -125,7 +125,7 @@ const tablebaseMoves = (moves: LilaTablebaseMove[], categories: LilaTablebaseCat
             ' ',
             h(`span.${winner}`, move.san.includes('=') || move.san.includes('x') ? 'Conversion' : `DTC ${Math.abs(move.dtc)}`),
           );
-        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : [...dtz50(), ` ${Math.abs(move.dtz)}`]));
+        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
       }
       return h('a', [move.san, ...badges]);
     }),
