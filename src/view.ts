@@ -1,7 +1,7 @@
 import { h, VNode, VNodes } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
-import { Ctrl, DEFAULT_FEN, relaxedParseFen } from './ctrl.js';
+import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, relaxedParseFen } from './ctrl.js';
 import { Color, opposite, ROLES } from 'chessops';
 
 export const view = (ctrl: Ctrl): VNode => {
@@ -95,17 +95,32 @@ export const view = (ctrl: Ctrl): VNode => {
       ctrl.tablebaseResponse.sync
         ? [
             ctrl.tablebaseResponse.sync.error,
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['loss', 'syzygy-loss', 'maybe-loss', 'blessed-loss'], ctrl.setup.turn),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['unknown'], undefined),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['draw'], undefined),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, ['cursed-win', 'maybe-win', 'syzygy-win', 'win'], opposite(ctrl.setup.turn)),
+            tablebaseMoves(
+              ctrl.tablebaseResponse.sync.moves,
+              'Win',
+              ['loss', 'syzygy-loss', 'maybe-loss', 'blessed-loss'],
+              ctrl.setup.turn,
+            ),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, '', ['unknown'], undefined),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, '', ['draw'], undefined),
+            tablebaseMoves(
+              ctrl.tablebaseResponse.sync.moves,
+              'Loss',
+              ['cursed-win', 'maybe-win', 'syzygy-win', 'win'],
+              opposite(ctrl.setup.turn),
+            ),
           ]
         : 'Loading ...',
     ),
   );
 };
 
-const tablebaseMoves = (moves: LilaTablebaseMove[], categories: LilaTablebaseCategory[], winner?: Color): VNode | undefined => {
+const tablebaseMoves = (
+  moves: EnrichedTablebaseMove[],
+  dtcPrefix: string,
+  categories: LilaTablebaseCategory[],
+  winner?: Color,
+): VNode | undefined => {
   moves = moves.filter(move => categories.includes(move.category));
   if (!moves.length) return;
   return h(
@@ -122,11 +137,16 @@ const tablebaseMoves = (moves: LilaTablebaseMove[], categories: LilaTablebaseCat
         if (move.dtc)
           badges.push(
             ' ',
-            h(`span.${winner}`, move.san.includes('=') || move.san.includes('x') ? 'Conversion' : `DTC ${Math.abs(move.dtc)}`),
+            h(
+              `span.${winner}`,
+              move.san.includes('=') || move.san.includes('x')
+                ? 'Conversion'
+                : `${dtcPrefix} with DTC ${Math.abs(move.dtc)}`,
+            ),
           );
         if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
       }
-      return h('a', [move.san, ...badges]);
+      return h('a', { attrs: { href: '/?fen=' + move.fen.replace(/ /g, '_') } }, [move.san, ...badges]);
     }),
   );
 };
@@ -160,10 +180,11 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
     h('div.right-side', [h('div.inner', [right])]),
     h('footer', [
       h('div.inner', [
-        h(
-          'p',
-          ["8-piece DTC via Marc Bourzutschky's op1 tables. 7-piece ", ...dtz50(), " via Ronald de Man's Syzygy tables. API hosted by lichess.org."],
-        ),
+        h('p', [
+          "8-piece DTC via Marc Bourzutschky's op1 tables. 7-piece ",
+          ...dtz50(),
+          " via Ronald de Man's Syzygy tables. API hosted by lichess.org.",
+        ]),
         h('p', [
           h(
             'a',

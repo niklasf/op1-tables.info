@@ -1,7 +1,7 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
 import { Piece, Move, SquareName } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { parseSquare } from 'chessops/util';
+import { parseSquare, parseUci } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
@@ -14,8 +14,13 @@ export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 export const relaxedParseFen = (fen: string | null | undefined): Result<Setup, FenError> =>
   parseFen(fen?.trim().replace(/_/g, ' ') || DEFAULT_FEN);
 
+export interface EnrichedTablebaseMove extends LilaTablebaseMove {
+  fen: string;
+  conversion: boolean;
+}
+
 export interface TablebaseResponse {
-  moves: LilaTablebaseMove[];
+  moves: EnrichedTablebaseMove[];
   error?: string;
 }
 
@@ -166,6 +171,11 @@ export class Ctrl {
     this.abortController?.abort();
     this.abortController = new AbortController();
 
+    const pos = Chess.fromSetup(this.setup);
+    if (pos.isErr) {
+      return { moves: [], error: `Illegal position: ${pos.error}` };
+    }
+
     const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
     url.searchParams.set('op1', 'always');
@@ -174,8 +184,13 @@ export class Ctrl {
       return { moves: [], error: `Failed to fetch tablebase: ${res.status}` };
     }
     const json: LilaTablebaseResponse = await res.json();
-    const shallowDtc = (move: LilaTablebaseMove) => (move.san.includes('=') || move.san.includes('x')) ? 0 : move.dtc || 0;
-    json.moves.sort((a, b) => shallowDtc(b) - shallowDtc(a));
-    return { moves: json.moves, error: 'Implementation in progress' };
+    return {
+      moves: json.moves.map(move => {
+        const after = pos.value.clone();
+        after.play(parseUci(move.uci)!);
+        return { ...move, conversion: move.san.includes('x') || move.san.includes('='), fen: makeFen(after.toSetup()) };
+      }),
+      error: 'Implementation in progress',
+    };
   }
 }
