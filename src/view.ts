@@ -53,13 +53,19 @@ export const view = (ctrl: Ctrl): VNode => {
         },
       }),
       sparePieces(ctrl, 'white'),
-      h('input', {
-        attrs: {
-          type: 'text',
-          placeholder: DEFAULT_FEN,
-          value: ctrl.getFen(),
-        },
-      }),
+      h('form', [
+        h('input', {
+          attrs: {
+            type: 'text',
+            placeholder: DEFAULT_FEN,
+            name: 'fen',
+          },
+          props: {
+            value: ctrl.getFen() == DEFAULT_FEN ? '' : ctrl.getFen(),
+          }
+        }),
+        h('button', { attrs: { type: 'submit' }}, 'Set FEN')
+      ]),
     ],
     h('div'),
   );
