@@ -24,6 +24,8 @@ export const view = (ctrl: Ctrl): VNode => {
               makeChessground(vnode.elm as HTMLElement, {
                 fen: ctrl.getFen(),
                 events: {
+                  move: ctrl.onChessgroundMove.bind(ctrl),
+                  dropNewPiece: ctrl.onChessgroundDropNewPiece.bind(ctrl),
                   change: ctrl.onChessgroundChange.bind(ctrl),
                 },
               }),
