@@ -16,7 +16,7 @@ export const view = (ctrl: Ctrl): VNode => {
       'Op1 endgame tablebase',
     ),
     [
-      sparePieces(ctrl, 'black'),
+      sparePieces(ctrl, ctrl.flipped ? 'white' : 'black', 'top'),
       h('div.cg-wrap', {
         hook: {
           insert: vnode =>
@@ -52,7 +52,7 @@ export const view = (ctrl: Ctrl): VNode => {
           destroy: () => ctrl.setGround(undefined),
         },
       }),
-      sparePieces(ctrl, 'white'),
+      sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
       h(
         'form',
         {
@@ -169,9 +169,9 @@ const tablebaseMoves = (
   );
 };
 
-const sparePieces = (ctrl: Ctrl, color: Color): VNode => {
+const sparePieces = (ctrl: Ctrl, color: Color, position: 'top' | 'bottom'): VNode => {
   return h(
-    `div.spare.${color == 'white' ? 'bottom' : 'top'}`,
+    `div.spare.${position}`,
     ROLES.reduce(
       (acc, role) => [
         ...acc,
