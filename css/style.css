@@ -5,8 +5,20 @@
     --body-bg-color: #1c2428;
     --secondary-bg-color: #2a3439;
     --body-color: #dee3e6;
+
     --link: #67b7d1;
     --link-visited: #89c9e0;
+
+    --border-color:#3d4851;
+
+    --draw-color: #fff;
+    --draw-bg-color: #757575;
+
+    --white-bg-color: white;
+    --white-color: black;
+
+    --black-bg-color: black;
+    --black-color: white;
 }
 
 body {
@@ -61,6 +73,49 @@ a:visited {
   width: 37px;
   height: 37px;
   background-size: cover;
+}
+
+/* Moves */
+
+.moves a {
+    display: block;
+    border: 1px solid var(--border-color);
+    color: var(--body-color);
+    text-decoration: none;
+    padding: 10px 15px;
+    margin-bottom: -1px;
+}
+
+.moves span {
+    float: right;
+    display: inline-block;
+    min-width: 10px;
+    padding: 3px 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    vertical-align: baseline;
+    white-space: nowrap;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+.moves span + span {
+    margin-right: 5px;
+}
+.moves span.draw {
+    background-color: var(--draw-bg-color);
+    color: var(--draw-color);
+}
+.moves span.white {
+    background-color: var(--white-bg-color);
+    color: var(--white-color);
+    ---border: 1px solid var(--white-color);
+}
+.moves span.black {
+    background-color: var(--black-bg-color);
+    color: var(--black-color);
+    ---border: 1px solid var(--black-color);
 }
 
 /* Layout: Base */

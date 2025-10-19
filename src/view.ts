@@ -2,7 +2,7 @@ import { h, VNode, VNodes } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, relaxedParseFen } from './ctrl.js';
-import { Color, ROLES } from 'chessops';
+import { Color, opposite, ROLES } from 'chessops';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -93,10 +93,39 @@ export const view = (ctrl: Ctrl): VNode => {
     h(
       'div',
       ctrl.tablebaseResponse.sync
-        ? [ctrl.tablebaseResponse.sync.error,
-          ...ctrl.tablebaseResponse.sync.moves.map(move => h('div', move.san))]
+        ? [
+            ctrl.tablebaseResponse.sync.error,
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'win', ctrl.setup.turn),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'draw', ctrl.setup.turn),
+            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, 'loss', opposite(ctrl.setup.turn)),
+          ]
         : 'Loading ...',
     ),
+  );
+};
+
+const tablebaseMoves = (moves: LilaTablebaseMove[], category: LilaTablebaseCategory, winner: Color): VNode | undefined => {
+  moves = moves.filter(move => move.category === category);
+  if (!moves.length) return;
+  return h(
+    'div.moves',
+    moves.map(move => {
+      const badges = [];
+      if (move.checkmate) badges.push(' ', h(`span.${winner}`, 'Checkmate'));
+      else if (move.stalemate) badges.push(' ', h('span.draw', 'Stalemate'));
+      else if (move.insufficient_material) badges.push(' ', h('span.draw', 'Insufficient material'));
+      else if (move.category === 'draw') badges.push(' ', h('span.draw', 'Draw'));
+      else {
+        if (move.dtm) badges.push(' ', h(`span.${winner}`, `DTM ${move.dtm}`));
+        if (move.dtc)
+          badges.push(
+            ' ',
+            h(`span.${winner}`, move.san.includes('=') || move.san.includes('x') ? 'Conversion' : `DTC ${move.dtc}`),
+          );
+        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${move.dtz}`));
+      }
+      return h('a', [move.san, ...badges]);
+    }),
   );
 };
 
@@ -129,20 +158,21 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
     h('div.right-side', [h('div.inner', [right])]),
     h('footer', [
       h('div.inner', [
+        h(
+          'p',
+          "8-piece DTC via Marc Bourzutschky's op1 tables. 7-piece DTZ via Ronald de Man's Syzygy tables. API hosted by lichess.org.",
+        ),
         h('p', [
-          "DTC provided by Marc Bourzutschky's op1 tables, delivered via a ",
           h(
             'a',
             {
               attrs: {
-                href: 'https://github.com/lichess-org/op1',
+                href: 'https://lichess.org/api#tag/Tablebase',
               },
             },
-            'public API hosted by lichess.org',
+            'Tablebase API',
           ),
-          '.',
-        ]),
-        h('p', [
+          '. ',
           h(
             'a',
             {
