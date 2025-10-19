@@ -19,5 +19,5 @@ const start = (element: Element) => {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  start(document.getElementById('main')!);
+  start(document.body);
 });

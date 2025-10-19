@@ -238,7 +238,7 @@ const turnButton = (ctrl: Ctrl, color: Color): VNode => {
 };
 
 const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
-  return h('div', [
+  return h('body', [
     h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
     h('div.right-side', [h('div.inner', [right])]),
     h('footer', [
