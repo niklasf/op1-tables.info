@@ -22,7 +22,7 @@ export interface EnrichedTablebaseMove extends LilaTablebaseMove {
 }
 
 export const MOVE_CATEGORIES = ['loss', 'draw', 'unknown', 'win'] as const;
-export type MoveCategory = typeof MOVE_CATEGORIES[number];
+export type MoveCategory = (typeof MOVE_CATEGORIES)[number];
 
 export interface TablebaseResponse {
   moves: EnrichedTablebaseMove[];
@@ -61,6 +61,8 @@ export class Ctrl {
     new Mousetrap()
       .bind('f', () => this.toggleFlipped())
       .bind('e', () => this.toggleEditMode())
+      .bind('w', () => this.push({ ...this.setup, turn: 'white' }))
+      .bind('b', () => this.push({ ...this.setup, turn: 'black' }))
       .bind('space', () =>
         this.tablebaseResponse.promise.then(
           response => response.moves.length && this.pushMove(parseUci(response.moves[0].uci)!),
@@ -81,11 +83,19 @@ export class Ctrl {
   }
 
   setHovering(move: NormalMove | undefined) {
-    this.withGround(ground => ground.setAutoShapes(move ? [{
-      orig: makeSquare(move.from),
-      dest: makeSquare(move.to),
-      brush: 'green',
-    }] : []))
+    this.withGround(ground =>
+      ground.setAutoShapes(
+        move
+          ? [
+              {
+                orig: makeSquare(move.from),
+                dest: makeSquare(move.to),
+                brush: 'green',
+              },
+            ]
+          : [],
+      ),
+    );
   }
 
   setGround(ground: CgApi | undefined) {
@@ -221,20 +231,26 @@ export class Ctrl {
     }
     const json: LilaTablebaseResponse = await res.json();
     return {
-      moves: json.moves.map(move => {
-        const after = pos.value.clone();
-        after.play(parseUci(move.uci)!);
-        const enrichedMove: EnrichedTablebaseMove = {
-          ...move,
-          conversion: move.san.includes('x') || move.san.includes('='),
-          fen: makeFen(after.toSetup()),
-          moveCategory:
-          move.category.includes('loss') ? 'win' : move.category.includes('win') ? 'loss' : move.category === 'draw' ? 'draw' : 'unknown'
-        };
-        return enrichedMove;
-      })
-      .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
-      .sort((a, b) => MOVE_CATEGORIES.indexOf(b.moveCategory) - MOVE_CATEGORIES.indexOf(a.moveCategory)),
+      moves: json.moves
+        .map(move => {
+          const after = pos.value.clone();
+          after.play(parseUci(move.uci)!);
+          const enrichedMove: EnrichedTablebaseMove = {
+            ...move,
+            conversion: move.san.includes('x') || move.san.includes('='),
+            fen: makeFen(after.toSetup()),
+            moveCategory: move.category.includes('loss')
+              ? 'win'
+              : move.category.includes('win')
+                ? 'loss'
+                : move.category === 'draw'
+                  ? 'draw'
+                  : 'unknown',
+          };
+          return enrichedMove;
+        })
+        .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
+        .sort((a, b) => MOVE_CATEGORIES.indexOf(b.moveCategory) - MOVE_CATEGORIES.indexOf(a.moveCategory)),
       error: 'Implementation in progress',
     };
   }

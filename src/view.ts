@@ -3,7 +3,7 @@ import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen } from './ctrl.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
-import { makeFen } from 'chessops/fen';
+import { makeFen, parseFen } from 'chessops/fen';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -69,6 +69,22 @@ export const view = (ctrl: Ctrl): VNode => {
       h(
         'div.btn-group',
         h('button.btn', { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } }, 'F'),
+      ),
+      h(
+        'div.btn-group',
+        h(
+          'a.btn',
+          {
+            attrs: {
+              href: '/?fen=' + DEFAULT_FEN.replace(/ /g, '_'),
+              title: 'Clear board',
+            },
+            on: {
+              click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap())),
+            },
+          },
+          'C',
+        ),
       ),
       h(
         'form',
@@ -161,11 +177,10 @@ const tablebaseMoves = (
             title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play best move (space)' : '',
           },
           on: {
-            click: e => {
-              e.preventDefault();
+            click: primaryClick(() => {
               ctrl.pushMove(parseUci(move.uci)!);
               ctrl.setHovering(undefined);
-            },
+            }),
             mouseover: () => ctrl.setHovering(parseUci(move.uci) as NormalMove),
             mouseleave: () => ctrl.setHovering(undefined),
           },
@@ -207,12 +222,12 @@ const turnButton = (ctrl: Ctrl, color: Color): VNode => {
   return h(
     `a.btn${color === ctrl.setup.turn ? '.active' : ''}`,
     {
-      attrs: { href: '/?fen=' + makeFen(setup).replace(/ /g, '_') },
+      attrs: {
+        href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
+        title: `Set ${color} to move (${color.substring(0, 1)})`,
+      },
       on: {
-        click: e => {
-          e.preventDefault();
-          ctrl.push(setup);
-        },
+        click: primaryClick(() => ctrl.push(setup)),
       },
     },
     `${capitalize(color)} to move`,
@@ -262,3 +277,11 @@ const dtz50 = (): Array<string | VNode> => ['DTZ', h('sub', '50'), '′′'];
 const spinner = (): VNode => h('div.spinner', [h('div.double-bounce1'), h('div.double-bounce2')]);
 
 const capitalize = (s: string): string => s.substring(0, 1).toUpperCase() + s.substring(1);
+
+const primaryClick = (f: (e: MouseEvent) => void): ((e: MouseEvent) => void) => {
+  return (e: MouseEvent) => {
+    if (e.altKey || e.ctrlKey || e.shiftKey || e.metaKey || e.button !== 0) return;
+    e.preventDefault();
+    f(e);
+  };
+};
