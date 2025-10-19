@@ -3,6 +3,7 @@ import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen } from './ctrl.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
+import { makeFen } from 'chessops/fen';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -16,6 +17,15 @@ export const view = (ctrl: Ctrl): VNode => {
       'Op1 endgame tablebase',
     ),
     [
+      h('div.btn-group', [turnButton(ctrl, 'white'), turnButton(ctrl, 'black')]),
+      h(
+        'div.btn-group',
+        h(
+          `button.btn${ctrl.editMode ? '.active' : ''}`,
+          { attrs: { title: 'Edit mode: ...' }, on: { click: () => ctrl.toggleEditMode() } },
+          ctrl.editMode ? 'E' : 'e',
+        ),
+      ),
       sparePieces(ctrl, ctrl.flipped ? 'white' : 'black', 'top'),
       h('div.cg-wrap', {
         hook: {
@@ -95,20 +105,10 @@ export const view = (ctrl: Ctrl): VNode => {
       ctrl.tablebaseResponse.sync
         ? [
             ctrl.tablebaseResponse.sync.error,
-            tablebaseMoves(
-              ctrl,
-              ctrl.tablebaseResponse.sync.moves,
-              'win',
-              ctrl.setup.turn,
-            ),
+            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'win', ctrl.setup.turn),
             tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'unknown', undefined),
             tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'draw', undefined),
-            tablebaseMoves(
-              ctrl,
-              ctrl.tablebaseResponse.sync.moves,
-              'loss',
-              opposite(ctrl.setup.turn),
-            ),
+            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'loss', opposite(ctrl.setup.turn)),
           ]
         : spinner(),
     ),
@@ -151,7 +151,7 @@ const tablebaseMoves = (
         {
           attrs: {
             href: '/?fen=' + move.fen.replace(/ /g, '_'),
-            title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play best move (space)' : ''
+            title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play best move (space)' : '',
           },
           on: {
             click: e => {
@@ -189,6 +189,26 @@ const sparePieces = (ctrl: Ctrl, color: Color, position: 'top' | 'bottom'): VNod
       ],
       [],
     ),
+  );
+};
+
+const turnButton = (ctrl: Ctrl, color: Color): VNode => {
+  const setup = {
+    ...ctrl.setup,
+    turn: color,
+  };
+  return h(
+    `a.btn${color === ctrl.setup.turn ? '.active' : ''}`,
+    {
+      attrs: { href: '/?fen=' + makeFen(setup).replace(/ /g, '_') },
+      on: {
+        click: e => {
+          e.preventDefault();
+          ctrl.push(setup);
+        },
+      },
+    },
+    `${capitalize(color)} to move`,
   );
 };
 

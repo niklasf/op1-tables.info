@@ -67,6 +67,12 @@ export class Ctrl {
       );
   }
 
+  toggleEditMode() {
+    this.editMode = !this.editMode;
+    this.updateGround();
+    this.redraw();
+  }
+
   setFlipped(flipped: boolean) {
     this.flipped = flipped;
     this.updateGround();
@@ -116,7 +122,7 @@ export class Ctrl {
           _ => false,
         ),
         movable: {
-          dests: pos.unwrap(chessgroundDests, _ => undefined),
+          dests: this.editMode ? undefined : pos.unwrap(chessgroundDests, _ => undefined),
         },
         orientation: this.flipped ? 'black' : 'white',
       });
