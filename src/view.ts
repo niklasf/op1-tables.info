@@ -63,6 +63,7 @@ export const view = (ctrl: Ctrl): VNode => {
         },
       }),
       sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
+      h('div.btn-group', h('button.btn', {attrs: {title: 'Flip board (f)'}, on: {click: () => ctrl.toggleFlipped()}}, 'F')),
       h(
         'form',
         {

@@ -59,7 +59,7 @@ export class Ctrl {
     });
 
     new Mousetrap()
-      .bind('f', () => this.setFlipped(!this.flipped))
+      .bind('f', () => this.toggleFlipped())
       .bind('space', () =>
         this.tablebaseResponse.promise.then(
           response => response.moves.length && this.pushMove(parseUci(response.moves[0].uci)!),
@@ -73,8 +73,8 @@ export class Ctrl {
     this.redraw();
   }
 
-  setFlipped(flipped: boolean) {
-    this.flipped = flipped;
+  toggleFlipped() {
+    this.flipped = !this.flipped;
     this.updateGround();
     this.redraw();
   }
