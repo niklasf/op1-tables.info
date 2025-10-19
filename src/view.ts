@@ -1,10 +1,10 @@
 import { h, VNode, VNodes } from 'snabbdom';
-import { Chessground } from 'chessground';
+import { Chessground as makeChessground } from '@lichess-org/chessground';
 
-import { Ctrl } from './ctrl.js';
+import { Ctrl, DEFAULT_FEN } from './ctrl.js';
 import { Color, ROLES } from 'chessops';
 
-export function view(ctrl: Ctrl): VNode {
+export const view = (ctrl: Ctrl): VNode => {
   return layout(
     h(
       'a',
@@ -19,23 +19,39 @@ export function view(ctrl: Ctrl): VNode {
       sparePieces('black'),
       h('div.cg-wrap', {
         hook: {
-          insert: viewChessground,
-          postpatch: viewChessground,
+          insert: vnode =>
+            ctrl.setChessground(
+              makeChessground(vnode.elm as HTMLElement, {
+                fen: ctrl.getFen(),
+                events: {
+                  change: ctrl.onChessgroundChange.bind(ctrl),
+                },
+              }),
+            ),
+          destroy: () => ctrl.setChessground(undefined),
         },
       }),
       sparePieces('white'),
+      h('input', {
+        attrs: {
+          type: 'text',
+          placeholder: DEFAULT_FEN,
+          value: ctrl.getFen(),
+        },
+      })
     ],
     h('div'),
   );
-}
+};
 
-function sparePieces(color: Color): VNode {
-  return h(`div.spare.${color == 'white' ? 'bottom' : 'top'}`,
+const sparePieces = (color: Color): VNode => {
+  return h(
+    `div.spare.${color == 'white' ? 'bottom' : 'top'}`,
     ROLES.map(role => h(`piece.${role}.${color}`, [])),
   );
 }
 
-function layout(title: VNode, left: VNodes, right: VNode): VNode {
+const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
   return h('div', [
     h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
     h('div.right-side', [h('div.inner', [right])]),
@@ -69,9 +85,4 @@ function layout(title: VNode, left: VNodes, right: VNode): VNode {
       ]),
     ]),
   ]);
-}
-
-function viewChessground(cgWrap: VNode) {
-  const el = cgWrap.elm as HTMLElement;
-  const cg = Chessground(el, {});
 }

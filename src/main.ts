@@ -5,7 +5,7 @@ import { view } from './view.js';
 
 const patch = init([classModule, attributesModule, eventListenersModule]);
 
-export function start(element: Element) {
+const start = (element: Element) => {
   let vnode: VNode | Element = element;
   let ctrl: Ctrl;
 
