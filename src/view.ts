@@ -13,6 +13,9 @@ export const view = (ctrl: Ctrl): VNode => {
         attrs: {
           href: '/',
         },
+        on: {
+          click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap()))
+        },
       },
       'Op1 endgame tablebase',
     ),
