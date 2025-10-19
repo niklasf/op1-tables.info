@@ -22,8 +22,26 @@ export const view = (ctrl: Ctrl): VNode => {
           insert: vnode =>
             ctrl.setGround(
               makeChessground(vnode.elm as HTMLElement, {
-                fen: ctrl.getFen(),
-                lastMove: ctrl.getLastMove(),
+                fen: ctrl.getBoardFen(),
+                autoCastle: false,
+                trustAllEvents: true,
+                movable: {
+                  free: true,
+                  color: 'both',
+                  showDests: true,
+                },
+                selectable: {
+                  enabled: false
+                },
+                draggable: {
+                  deleteOnDropOff: true,
+                },
+                animation: {
+                  enabled: ctrl.wantsReducedMotion(),
+                },
+                drawable: {
+                  defaultSnapToValidMove: false,
+                },
                 events: {
                   move: ctrl.onCgMove.bind(ctrl),
                   dropNewPiece: ctrl.onCgDropNewPiece.bind(ctrl),

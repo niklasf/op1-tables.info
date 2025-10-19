@@ -47,7 +47,7 @@ export class Ctrl {
     this.withGround(ground =>
       ground.set({
         lastMove: this.getLastMove(),
-        fen: makeBoardFen(this.setup.board),
+        fen: this.getBoardFen(),
         turnColor: setup.turn,
         check: pos.unwrap(
           p => p.isCheck() && p.turn,
@@ -85,6 +85,10 @@ export class Ctrl {
     return makeFen(this.setup);
   }
 
+  getBoardFen(): string {
+    return makeBoardFen(this.setup.board);
+  }
+
   getLastMove(): SquareName[] | undefined {
     return this.lastMove && chessgroundMove(this.lastMove);
   }
@@ -118,5 +122,9 @@ export class Ctrl {
         board: parseBoardFen(ground.getFen()).unwrap(),
       }),
     );
+  }
+
+  wantsReducedMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }
