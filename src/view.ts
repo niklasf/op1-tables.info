@@ -16,7 +16,7 @@ export const view = (ctrl: Ctrl): VNode => {
       'Op1 endgame tablebase',
     ),
     [
-      sparePieces('black'),
+      sparePieces(ctrl, 'black'),
       h('div.cg-wrap', {
         hook: {
           insert: vnode =>
@@ -31,7 +31,7 @@ export const view = (ctrl: Ctrl): VNode => {
                   showDests: true,
                 },
                 selectable: {
-                  enabled: false
+                  enabled: false,
                 },
                 draggable: {
                   deleteOnDropOff: true,
@@ -52,25 +52,36 @@ export const view = (ctrl: Ctrl): VNode => {
           destroy: () => ctrl.setGround(undefined),
         },
       }),
-      sparePieces('white'),
+      sparePieces(ctrl, 'white'),
       h('input', {
         attrs: {
           type: 'text',
           placeholder: DEFAULT_FEN,
           value: ctrl.getFen(),
         },
-      })
+      }),
     ],
     h('div'),
   );
 };
 
-const sparePieces = (color: Color): VNode => {
+const sparePieces = (ctrl: Ctrl, color: Color): VNode => {
   return h(
     `div.spare.${color == 'white' ? 'bottom' : 'top'}`,
-    ROLES.map(role => h(`piece.${role}.${color}`, [])),
+    ROLES.map(role =>
+      h(
+        `piece.${role}.${color}`,
+        {
+          on: {
+            touchstart: e => ctrl.onSpareMouseDown(e, { color, role }),
+            mousedown: e => ctrl.onSpareMouseDown(e, { color, role }),
+          },
+        },
+        [],
+      ),
+    ),
   );
-}
+};
 
 const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
   return h('div', [
@@ -106,4 +117,4 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
       ]),
     ]),
   ]);
-}
+};

@@ -58,8 +58,8 @@ export class Ctrl {
   }
 
   private updateGround() {
-    const pos = Chess.fromSetup(this.setup);
-    this.withGround(ground =>
+    this.withGround(ground => {
+      const pos = Chess.fromSetup(this.setup);
       ground.set({
         lastMove: this.getLastMove(),
         fen: this.getBoardFen(),
@@ -71,8 +71,8 @@ export class Ctrl {
         movable: {
           dests: pos.unwrap(chessgroundDests, _ => undefined),
         },
-      }),
-    );
+      });
+    });
   }
 
   push(setup: Setup, lastMove?: Move) {
@@ -82,7 +82,7 @@ export class Ctrl {
     }
   }
 
-  pushMove(move: Move) {
+  pushMove(move: Move): boolean {
     return Chess.fromSetup(this.setup).unwrap(
       pos => {
         if (!pos.isLegal(move)) return false;
@@ -137,7 +137,14 @@ export class Ctrl {
     );
   }
 
-  wantsReducedMotion() {
+  onSpareMouseDown(e: MouseEvent | TouchEvent, piece: Piece) {
+    this.withGround(ground => {
+      e.preventDefault();
+      ground.dragNewPiece(piece, e, true);
+    });
+  }
+
+  wantsReducedMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }
