@@ -8,6 +8,9 @@ import { Result } from '@badrap/result';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
+export const relaxedParseFen = (fen: string | null | undefined): Result<Setup, FenError> =>
+  parseFen(fen?.trim().replace(/_/g, ' ') || DEFAULT_FEN);
+
 export class Ctrl {
   public setup: Setup;
   public lastMove: Move | undefined;
@@ -16,23 +19,19 @@ export class Ctrl {
   private ground: CgApi | undefined;
 
   constructor(private readonly redraw: () => void) {
-    const fen = new URLSearchParams(location.search).get('fen');
-    this.setup = (fen ? Result.ok(fen) : Result.err(new FenError(InvalidFen.Fen)))
-      .chain(fen => parseFen(fen.replace(/_/g, ' ')))
-      .unwrap(
-        setup => setup,
-        _ => parseFen(DEFAULT_FEN).unwrap(),
-      );
+    this.setup = relaxedParseFen(new URLSearchParams(location.search).get('fen')).unwrap(
+      setup => setup,
+      _ => parseFen(DEFAULT_FEN).unwrap(),
+    );
 
     window.addEventListener('popstate', event => {
-      const fen = event.state?.fen || new URLSearchParams(location.search).get('fen');
-      const setup = (fen ? Result.ok(fen) : Result.err(new FenError(InvalidFen.Fen)))
-        .chain(fen => parseFen(fen.replace(/_/g, ' ')))
-        .unwrap(
+      this.setPosition(
+        relaxedParseFen(event.state?.fen || new URLSearchParams(location.search).get('fen')).unwrap(
           setup => setup,
           _ => parseFen(DEFAULT_FEN).unwrap(),
-        );
-      this.setPosition(setup, event.state?.lastMove);
+        ),
+        event.state?.lastMove,
+      );
     });
   }
 

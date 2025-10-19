@@ -1,7 +1,7 @@
 import { h, VNode, VNodes } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
-import { Ctrl, DEFAULT_FEN } from './ctrl.js';
+import { Ctrl, DEFAULT_FEN, relaxedParseFen } from './ctrl.js';
 import { Color, ROLES } from 'chessops';
 
 export const view = (ctrl: Ctrl): VNode => {
@@ -62,9 +62,20 @@ export const view = (ctrl: Ctrl): VNode => {
           },
           props: {
             value: ctrl.getFen() == DEFAULT_FEN ? '' : ctrl.getFen(),
-          }
+          },
+          on: {
+            change: e => {
+              const input = e.target as HTMLInputElement;
+              input.setCustomValidity(
+                relaxedParseFen(input.value).unwrap(
+                  _ => '',
+                  _ => 'Invalid FEN',
+                ),
+              );
+            },
+          },
         }),
-        h('button', { attrs: { type: 'submit' }}, 'Set FEN')
+        h('button', { attrs: { type: 'submit' } }, 'Set FEN'),
       ]),
     ],
     h('div'),
