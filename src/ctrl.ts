@@ -18,7 +18,11 @@ export const relaxedParseFen = (fen: string | null | undefined): Result<Setup, F
 export interface EnrichedTablebaseMove extends LilaTablebaseMove {
   fen: string;
   conversion: boolean;
+  moveCategory: MoveCategory;
 }
+
+export const MOVE_CATEGORIES = ['loss', 'draw', 'unknown', 'win'] as const;
+export type MoveCategory = typeof MOVE_CATEGORIES[number];
 
 export interface TablebaseResponse {
   moves: EnrichedTablebaseMove[];
@@ -54,7 +58,13 @@ export class Ctrl {
       );
     });
 
-    new Mousetrap().bind('f', () => this.setFlipped(!this.flipped));
+    new Mousetrap()
+      .bind('f', () => this.setFlipped(!this.flipped))
+      .bind('space', () =>
+        this.tablebaseResponse.promise.then(
+          response => response.moves.length && this.pushMove(parseUci(response.moves[0].uci)!),
+        ),
+      );
   }
 
   setFlipped(flipped: boolean) {
@@ -199,8 +209,17 @@ export class Ctrl {
       moves: json.moves.map(move => {
         const after = pos.value.clone();
         after.play(parseUci(move.uci)!);
-        return { ...move, conversion: move.san.includes('x') || move.san.includes('='), fen: makeFen(after.toSetup()) };
-      }),
+        const enrichedMove: EnrichedTablebaseMove = {
+          ...move,
+          conversion: move.san.includes('x') || move.san.includes('='),
+          fen: makeFen(after.toSetup()),
+          moveCategory:
+          move.category.includes('loss') ? 'win' : move.category.includes('win') ? 'loss' : move.category === 'draw' ? 'draw' : 'unknown'
+        };
+        return enrichedMove;
+      })
+      .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
+      .sort((a, b) => MOVE_CATEGORIES.indexOf(b.moveCategory) - MOVE_CATEGORIES.indexOf(a.moveCategory)),
       error: 'Implementation in progress',
     };
   }
