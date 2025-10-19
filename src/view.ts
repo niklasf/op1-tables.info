@@ -2,7 +2,7 @@ import { h, VNode, VNodes } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, relaxedParseFen } from './ctrl.js';
-import { Color, opposite, ROLES } from 'chessops';
+import { Color, opposite, parseUci, ROLES } from 'chessops';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -96,26 +96,29 @@ export const view = (ctrl: Ctrl): VNode => {
         ? [
             ctrl.tablebaseResponse.sync.error,
             tablebaseMoves(
+              ctrl,
               ctrl.tablebaseResponse.sync.moves,
               'Win',
               ['loss', 'syzygy-loss', 'maybe-loss', 'blessed-loss'],
               ctrl.setup.turn,
             ),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, '', ['unknown'], undefined),
-            tablebaseMoves(ctrl.tablebaseResponse.sync.moves, '', ['draw'], undefined),
+            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, '', ['unknown'], undefined),
+            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, '', ['draw'], undefined),
             tablebaseMoves(
+              ctrl,
               ctrl.tablebaseResponse.sync.moves,
               'Loss',
               ['cursed-win', 'maybe-win', 'syzygy-win', 'win'],
               opposite(ctrl.setup.turn),
             ),
           ]
-        : 'Loading ...',
+        : spinner(),
     ),
   );
 };
 
 const tablebaseMoves = (
+  ctrl: Ctrl,
   moves: EnrichedTablebaseMove[],
   dtcPrefix: string,
   categories: LilaTablebaseCategory[],
@@ -146,7 +149,18 @@ const tablebaseMoves = (
           );
         if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
       }
-      return h('a', { attrs: { href: '/?fen=' + move.fen.replace(/ /g, '_') } }, [move.san, ...badges]);
+      return h(
+        'a',
+        {
+          attrs: { href: '/?fen=' + move.fen.replace(/ /g, '_') },
+          on: {
+            click: e => {
+              if (ctrl.pushMove(parseUci(move.uci)!)) e.preventDefault();
+            },
+          },
+        },
+        [move.san, ...badges],
+      );
     }),
   );
 };
@@ -213,3 +227,5 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
 };
 
 const dtz50 = (): Array<string | VNode> => ['DTZ', h('sub', '50'), '′′'];
+
+const spinner = (): VNode => h('div.spinner', [h('div.double-bounce1'), h('div.double-bounce2')]);
