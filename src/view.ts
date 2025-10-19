@@ -149,7 +149,10 @@ const tablebaseMoves = (
       return h(
         'a',
         {
-          attrs: { href: '/?fen=' + move.fen.replace(/ /g, '_') },
+          attrs: {
+            href: '/?fen=' + move.fen.replace(/ /g, '_'),
+            title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play best move (space)' : ''
+          },
           on: {
             click: e => {
               if (ctrl.pushMove(parseUci(move.uci)!)) e.preventDefault();
