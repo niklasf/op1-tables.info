@@ -2,7 +2,7 @@ import { h, VNode, VNodes } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen } from './ctrl.js';
-import { Color, opposite, parseUci, ROLES } from 'chessops';
+import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -155,8 +155,12 @@ const tablebaseMoves = (
           },
           on: {
             click: e => {
-              if (ctrl.pushMove(parseUci(move.uci)!)) e.preventDefault();
+              e.preventDefault();
+              ctrl.pushMove(parseUci(move.uci)!);
+              ctrl.setHovering(undefined);
             },
+            mouseover: () => ctrl.setHovering(parseUci(move.uci) as NormalMove),
+            mouseleave: () => ctrl.setHovering(undefined),
           },
         },
         [move.san, ...badges],

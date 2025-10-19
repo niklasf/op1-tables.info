@@ -1,7 +1,7 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Piece, Move, SquareName } from 'chessops/types';
+import { Piece, Move, SquareName, NormalMove } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { parseSquare, parseUci } from 'chessops/util';
+import { parseSquare, parseUci, makeSquare } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
@@ -71,6 +71,14 @@ export class Ctrl {
     this.flipped = flipped;
     this.updateGround();
     this.redraw();
+  }
+
+  setHovering(move: NormalMove | undefined) {
+    this.withGround(ground => ground.setAutoShapes(move ? [{
+      orig: makeSquare(move.from),
+      dest: makeSquare(move.to),
+      brush: 'green',
+    }] : []))
   }
 
   setGround(ground: CgApi | undefined) {
