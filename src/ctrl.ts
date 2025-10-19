@@ -174,6 +174,8 @@ export class Ctrl {
       return { moves: [], error: `Failed to fetch tablebase: ${res.status}` };
     }
     const json: LilaTablebaseResponse = await res.json();
+    const shallowDtc = (move: LilaTablebaseMove) => (move.san.includes('=') || move.san.includes('x')) ? 0 : move.dtc || 0;
+    json.moves.sort((a, b) => shallowDtc(b) - shallowDtc(a));
     return { moves: json.moves, error: 'Implementation in progress' };
   }
 }

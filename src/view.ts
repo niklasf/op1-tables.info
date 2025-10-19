@@ -108,7 +108,6 @@ export const view = (ctrl: Ctrl): VNode => {
 const tablebaseMoves = (moves: LilaTablebaseMove[], categories: LilaTablebaseCategory[], winner?: Color): VNode | undefined => {
   moves = moves.filter(move => categories.includes(move.category));
   if (!moves.length) return;
-  moves.sort((a, b) => (a.dtc || 0) - (b.dtc || 0));
   return h(
     'div.moves',
     moves.map(move => {
