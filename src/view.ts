@@ -143,13 +143,12 @@ export const view = (ctrl: Ctrl): VNode => {
 const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => {
   if (res.error)
     return [
-      h('div.panel', [
-        h('h2', res.error.title),
-        h('p', res.error.message),
+      h('h2.panel', res.error.title),
+      h('p.panel', [res.error.message,
         res.error.retry
           ? h('div.btn-group', [h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry')])
           : undefined,
-      ]),
+      ])
     ];
 
   const titleSuffix = res.pos?.dtc
