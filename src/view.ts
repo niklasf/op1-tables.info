@@ -185,7 +185,7 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
     ctrl.setup.board.occupied.size() == 8 && veryWeakSide
       ? h(
           'p.panel',
-          `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than 1 pawn of material.`,
+          `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than one pawn of material.`,
         )
       : undefined,
     ctrl.setup.board.occupied.size() == 8 && !ctrl.opposedPawn()

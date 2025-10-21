@@ -164,7 +164,6 @@ export class Ctrl {
                 orig: makeSquare(opposedPawn.from),
                 dest: makeSquare(opposedPawn.to),
                 brush: 'paleGreen',
-                label: { text: 'Op1' },
               },
             ]
           : []),
