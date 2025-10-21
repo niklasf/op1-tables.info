@@ -1,5 +1,6 @@
 @import 'cardinal.css';
 @import 'chessground.css';
+@import 'fontello.css';
 
 :root {
     --body-bg-color: #1c2428;
@@ -19,6 +20,9 @@
 
     --black-bg-color: black;
     --black-color: white;
+
+    --shadow: rgba(255, 255, 255, 0.125);
+    --shadow-inset: -3px;
 }
 
 body {
@@ -89,6 +93,9 @@ a:visited {
     padding: 10px 15px;
     margin-bottom: -1px;
 }
+.moves a:active {
+    box-shadow: inset 0 var(--shadow-inset) 5px var(--shadow);
+}
 .moves a:hover {
     background: var(--secondary-bg-color);
 }
@@ -134,16 +141,45 @@ a:visited {
 
 /* Button group */
 
-.btn-group .btn {
+.btn-group {
+    display: inline-flex;
+    margin: 0.5em 0.2em;
+}
+
+.btn-group .btn, .btn-group input {
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px 12px;
+    text-decoration: none;
+    line-height: 1.42;
+    font-size: 14px;
+    margin-left: -1px;
     border: 1px solid var(--border-color);
 }
-.btn-group .btn:first-child {
+.btn-group input {
+    flex-grow: 1;
+    background-color: (--body-color);
+    color: var(--body-bg-color);
+}
+.btn-group .btn {
+    touch-action: manipulation;
+    white-space: nowrap;
+    cursor: pointer;
+    color: var(--body-color);
+    background-color: var(--body-bg-color);
+}
+.btn-group :first-child {
     border-top-left-radius: 4px;
     border-bottom-left-radius: 4px;
 }
-.btn-group .btn:last-child {
+.btn-group :last-child {
     border-top-right-radius: 4px;
     border-bottom-right-radius: 4px;
+}
+
+.btn.active,
+.btn:active {
+    box-shadow: inset 0 var(--shadow-inset) 5px var(--shadow);
 }
 
 /* Layout: Base */

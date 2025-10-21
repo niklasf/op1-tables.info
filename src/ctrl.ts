@@ -3,6 +3,7 @@ import { Piece, Move, SquareName, NormalMove } from 'chessops/types';
 import { Setup } from 'chessops/setup';
 import { parseSquare, parseUci, makeSquare } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
+import { SquareSet } from 'chessops/squareSet';
 import { Chess } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
@@ -211,6 +212,26 @@ export class Ctrl {
 
   wantsReducedMotion(): boolean {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  clearedBoardSetup(): Setup {
+    return {
+      ...this.setup,
+      board: parseBoardFen(DEFAULT_FEN).unwrap(),
+      castlingRights: SquareSet.empty(),
+      epSquare: undefined,
+    };
+  }
+
+  swappedColorsSetup(): Setup {
+    const board = this.setup.board.clone();
+    [board.white, board.black] = [board.black, board.white];
+    return {
+      ...this.setup,
+      board,
+      castlingRights: SquareSet.empty(),
+      epSquare: undefined,
+    };
   }
 
   async fetchTablebase(): Promise<TablebaseResponse> {

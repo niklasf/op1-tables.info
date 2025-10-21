@@ -3,6 +3,7 @@ import { Chessground as makeChessground } from '@lichess-org/chessground';
 
 import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen } from './ctrl.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
+import { Setup } from 'chessops/setup';
 import { makeFen, parseFen } from 'chessops/fen';
 
 export const view = (ctrl: Ctrl): VNode => {
@@ -14,7 +15,7 @@ export const view = (ctrl: Ctrl): VNode => {
           href: '/',
         },
         on: {
-          click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap()))
+          click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap())),
         },
       },
       'Op1 endgame tablebase',
@@ -29,7 +30,7 @@ export const view = (ctrl: Ctrl): VNode => {
             attrs: { title: 'Edit mode: Do not switch sides when playing moves on the board (e)' },
             on: { click: () => ctrl.toggleEditMode() },
           },
-          ctrl.editMode ? 'E' : 'e',
+          icon(ctrl.editMode ? 'lock' : 'lock-open')
         ),
       ),
       sparePieces(ctrl, ctrl.flipped ? 'white' : 'black', 'top'),
@@ -53,7 +54,7 @@ export const view = (ctrl: Ctrl): VNode => {
                   deleteOnDropOff: true,
                 },
                 animation: {
-                  enabled: ctrl.wantsReducedMotion(),
+                  enabled: !ctrl.wantsReducedMotion(),
                 },
                 drawable: {
                   defaultSnapToValidMove: false,
@@ -71,24 +72,19 @@ export const view = (ctrl: Ctrl): VNode => {
       sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
       h(
         'div.btn-group',
-        h('button.btn', { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } }, 'F'),
+        h(
+          `button.btn${ctrl.flipped ? '.active' : ''}`,
+          { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } },
+          icon('rotate'),
+        ),
       ),
       h(
         'div.btn-group',
-        h(
-          'a.btn',
-          {
-            attrs: {
-              href: '/?fen=' + DEFAULT_FEN.replace(/ /g, '_'),
-              title: 'Clear board',
-            },
-            on: {
-              click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap())),
-            },
-          },
-          'C',
-        ),
+        setupButton(ctrl, ctrl.clearedBoardSetup(), 'eraser', 'Clear board'),
       ),
+      h('div.btn-group', [
+        setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
+      ]),
       h(
         'form',
         {
@@ -100,7 +96,7 @@ export const view = (ctrl: Ctrl): VNode => {
             },
           },
         },
-        [
+        h('div.btn-group', [
           h('input', {
             attrs: {
               type: 'text',
@@ -122,8 +118,8 @@ export const view = (ctrl: Ctrl): VNode => {
               },
             },
           }),
-          h('button', { attrs: { type: 'submit' } }, 'Set FEN'),
-        ],
+          h('button.btn', { attrs: { type: 'submit' } }, 'Set FEN'),
+        ]),
       ),
     ],
     h(
@@ -237,6 +233,20 @@ const turnButton = (ctrl: Ctrl, color: Color): VNode => {
   );
 };
 
+const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode => h(
+  'a.btn',
+  {
+    attrs: {
+      href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
+      title,
+    },
+    on: {
+      click: primaryClick(() => ctrl.push(setup)),
+    },
+  },
+  icon(i),
+);
+
 const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
   return h('body', [
     h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
@@ -276,6 +286,8 @@ const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
 };
 
 const dtz50 = (): Array<string | VNode> => ['DTZ', h('sub', '50'), '′′'];
+
+const icon = (name: string): VNode => h(`span.icon.icon-${name}`);
 
 const spinner = (): VNode => h('div.spinner', [h('div.double-bounce1'), h('div.double-bounce2')]);
 
