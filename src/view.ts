@@ -167,9 +167,13 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
         ? h('h2.panel', 'Insufficient material')
         : h('h2.panel', [capitalize(res.pos?.simpleCategory || 'unknown'), titleSuffix]);
 
+  const veryWeakSide = ctrl.veryWeakSide();
+
   return [
     title,
     tablebaseMoves(ctrl, res.moves, 'win', ctrl.setup.turn),
+    ctrl.setup.board.occupied.size() > 8 ? h('p.panel', 'The tablebase only covers positions with up to 8 pieces.') : undefined,
+    ctrl.setup.board.occupied.size() == 8 && veryWeakSide ? h('p.panel', `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than 1 pawn of material.`) : undefined,
     tablebaseMoves(ctrl, res.moves, 'unknown', undefined),
     tablebaseMoves(ctrl, res.moves, 'draw', undefined),
     tablebaseMoves(ctrl, res.moves, 'loss', opposite(ctrl.setup.turn)),

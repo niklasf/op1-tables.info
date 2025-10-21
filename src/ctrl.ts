@@ -1,5 +1,5 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Piece, Move, SquareName, NormalMove } from 'chessops/types';
+import { Piece, Move, SquareName, NormalMove, Color, COLORS } from 'chessops/types';
 import { Setup } from 'chessops/setup';
 import { opposite, parseSquare, parseUci, makeSquare } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
@@ -246,6 +246,14 @@ export class Ctrl {
     };
   }
 
+  veryWeakSide(): Color | undefined {
+    return COLORS.find(
+      color =>
+        !this.setup.board.pieces(color, 'pawn').moreThanOne() &&
+        this.setup.board[color].diff(this.setup.board.king).diff(this.setup.board.pawn).isEmpty(),
+    );
+  }
+
   async fetchTablebase(): Promise<TablebaseResponse> {
     this.abortController?.abort();
     this.abortController = new AbortController();
@@ -257,13 +265,13 @@ export class Ctrl {
           title: 'Illegal position',
           message:
             pos.error.message == IllegalSetup.Empty
-              ? 'Board is empty'
+              ? 'Board is empty.'
               : pos.error.message == IllegalSetup.OppositeCheck
-                ? `${capitalize(this.setup.turn)} to move, but ${capitalize(opposite(this.setup.turn))} in check`
+                ? `${capitalize(this.setup.turn)} to move, but ${capitalize(opposite(this.setup.turn))} in check.`
                 : pos.error.message == IllegalSetup.PawnsOnBackrank
-                  ? 'Pawns on backrank'
+                  ? 'Pawns on backrank.'
                   : pos.error.message == IllegalSetup.Kings
-                    ? 'Need exactly one king of each color'
+                    ? 'Need exactly one king of each color.'
                     : '',
           retry: false,
         },
