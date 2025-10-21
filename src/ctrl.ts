@@ -1,10 +1,10 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
 import { Piece, Move, SquareName, NormalMove, Color, COLORS, Square } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { defined, opposite, parseSquare, parseUci, makeSquare } from 'chessops/util';
+import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { SquareSet } from 'chessops/squareSet';
-import { Chess, IllegalSetup } from 'chessops/chess';
+import { Chess, IllegalSetup, isStandardMaterial } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
 import { Result } from '@badrap/result';
@@ -282,15 +282,11 @@ export class Ctrl {
       .union(whitePawns.shl64(40))
       .intersect(blackPawns)
       .first();
-    const whiteWitness = blackPawns
-      .shr64(8)
-      .union(blackPawns.shr64(16))
-      .union(blackPawns.shr64(24))
-      .union(blackPawns.shr64(32))
-      .union(blackPawns.shr64(40))
-      .intersect(whitePawns)
-      .last();
-    if (!defined(whiteWitness) || !defined(blackWitness)) return;
+    if (!blackWitness) return;
+    const whiteWitness = Array.from(whitePawns.reversed()).find(
+      p => p < blackWitness && squareFile(p) == squareFile(blackWitness),
+    );
+    if (!whiteWitness) return;
     return this.setup.turn === 'white' ? [whiteWitness, blackWitness] : [blackWitness, whiteWitness];
   }
 
@@ -318,6 +314,16 @@ export class Ctrl {
         moves: [],
       };
     }
+
+    if (!isStandardMaterial(pos.value))
+      return {
+        error: {
+          title: 'Impossible material',
+          message: 'Material combination cannot be reached in a normal chess game.',
+          retry: false,
+        },
+        moves: [],
+      };
 
     const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
