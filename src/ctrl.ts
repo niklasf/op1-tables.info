@@ -251,9 +251,15 @@ export class Ctrl {
     const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
     url.searchParams.set('op1', 'always');
-    const res = await fetch(url.href, { signal: this.abortController.signal });
+
+    let res;
+    try {
+      res = await fetch(url.href, { signal: this.abortController.signal });
+    } catch (error) {
+      return { moves: [], error: error.message };
+    }
     if (!res.ok) {
-      return { moves: [], error: `Failed to fetch tablebase: ${res.status}` };
+      return { moves: [], error: `Tablebase error: HTTP ${res.status}` };
     }
     const json: LilaTablebaseResponse = await res.json();
     return {

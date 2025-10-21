@@ -52,8 +52,12 @@ h1 a:visited {
 }
 
 h2 {
-    padding: 10px 15px;
+    font-size: 1.05em;
     margin: 0;
+}
+
+.panel {
+    padding: 10px 15px;
     margin-bottom: 1rem;
     border: 1px solid var(--border-color);
     border-radius: 4px;
