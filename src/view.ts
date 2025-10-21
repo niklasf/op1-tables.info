@@ -12,7 +12,7 @@ import {
 import { capitalize } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Setup } from 'chessops/setup';
-import { makeFen, parseFen } from 'chessops/fen';
+import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
 
 type MaybeVNode = VNode | string | undefined;
@@ -144,11 +144,12 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
   if (res.error)
     return [
       h('h2.panel', res.error.title),
-      h('p.panel', [res.error.message,
+      h('p.panel', [
+        res.error.message,
         res.error.retry
           ? h('div.btn-group', [h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry')])
           : undefined,
-      ])
+      ]),
     ];
 
   const titleSuffix = res.pos?.dtc
@@ -172,8 +173,21 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
   return [
     title,
     tablebaseMoves(ctrl, res.moves, 'win', ctrl.setup.turn),
-    ctrl.setup.board.occupied.size() > 8 ? h('p.panel', 'The tablebase only covers positions with up to 8 pieces.') : undefined,
-    ctrl.setup.board.occupied.size() == 8 && veryWeakSide ? h('p.panel', `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than 1 pawn of material.`) : undefined,
+    ctrl.getFen() == INITIAL_FEN
+      ? h('p.panel', [
+          'Not solved ',
+          h('a', { attrs: { href: 'https://en.wikipedia.org/wiki/Solving_chess' } }, 'just yet'),
+          '.',
+        ])
+      : ctrl.setup.board.occupied.size() > 8
+        ? h('p.panel', 'The tablebase only covers positions with up to 8 pieces.')
+        : undefined,
+    ctrl.setup.board.occupied.size() == 8 && veryWeakSide
+      ? h(
+          'p.panel',
+          `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than 1 pawn of material.`,
+        )
+      : undefined,
     tablebaseMoves(ctrl, res.moves, 'unknown', undefined),
     tablebaseMoves(ctrl, res.moves, 'draw', undefined),
     tablebaseMoves(ctrl, res.moves, 'loss', opposite(ctrl.setup.turn)),

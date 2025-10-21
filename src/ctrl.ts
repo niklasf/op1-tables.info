@@ -1,7 +1,7 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
 import { Piece, Move, SquareName, NormalMove, Color, COLORS, Square } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile } from 'chessops/util';
+import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile, squareFromCoords } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { SquareSet } from 'chessops/squareSet';
 import { Chess, IllegalSetup, isStandardMaterial } from 'chessops/chess';
@@ -147,13 +147,14 @@ export class Ctrl {
   private updateAutoShapes() {
     this.withGround(ground => {
       const op1 = this.setup.board.occupied.size() >= 8 && this.op1();
+      const refuteOp1 = (this.setup.board.occupied.size() >= 8 && !op1 && this.refuteOp1()) || [];
       ground.setAutoShapes([
         ...(this.hovering
           ? [
               {
                 orig: makeSquare(this.hovering.from),
                 dest: makeSquare(this.hovering.to),
-                brush: 'green',
+                brush: 'blue',
               },
             ]
           : []),
@@ -162,10 +163,16 @@ export class Ctrl {
               {
                 orig: makeSquare(op1[0]),
                 dest: makeSquare(op1[1]),
-                brush: 'green',
+                brush: 'paleGreen',
+                label: { text: 'OP1' },
               },
             ]
           : []),
+        ...refuteOp1.map(r => ({
+          orig: makeSquare(r[0]),
+          dest: makeSquare(r[1]),
+          brush: 'paleRed',
+        })),
       ]);
     });
   }
@@ -288,6 +295,16 @@ export class Ctrl {
     );
     if (!whiteWitness) return;
     return this.setup.turn === 'white' ? [whiteWitness, blackWitness] : [blackWitness, whiteWitness];
+  }
+
+  refuteOp1(): [Square, Square][] {
+    return [0, 1, 2, 3, 4, 5, 6, 7]
+      .map(file => {
+        const pawns = SquareSet.fromFile(file).intersect(this.setup.board.pieces(this.setup.turn, 'pawn'));
+        return this.setup.turn === 'white' ? pawns.last() : pawns.first();
+      })
+      .filter(defined)
+      .map(pawn => [pawn, squareFromCoords(squareFile(pawn), this.setup.turn === 'white' ? 7 : 0)!]);
   }
 
   async fetchTablebase(): Promise<TablebaseResponse> {
