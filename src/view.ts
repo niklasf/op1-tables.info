@@ -1,11 +1,20 @@
-import { h, VNode, VNodes } from 'snabbdom';
+import { h, VNode } from 'snabbdom';
 import { Chessground as makeChessground } from '@lichess-org/chessground';
 
-import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen } from './ctrl.js';
+import {
+  Ctrl,
+  DEFAULT_FEN,
+  EnrichedTablebaseMove,
+  TablebaseResponse,
+  SimpleCategory,
+  relaxedParseFen,
+} from './ctrl.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Setup } from 'chessops/setup';
 import { makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
+
+type MaybeVNode = VNode | string | undefined;
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -126,28 +135,43 @@ export const view = (ctrl: Ctrl): VNode => {
         ]),
       ),
     ],
-    h(
-      'div',
-      ctrl.tablebaseResponse.sync
-        ? [
-            ctrl.tablebaseResponse.sync.error || undefined,
-            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'win', ctrl.setup.turn),
-            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'unknown', undefined),
-            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'draw', undefined),
-            tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'loss', opposite(ctrl.setup.turn)),
-          ]
-        : spinner(),
-    ),
+    ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : [spinner()],
   );
+};
+
+const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => {
+  const titleSuffix = res.pos?.dtc
+    ? ` with DTC ${Math.abs(res.pos.dtc)}`
+    : res.pos?.dtz
+      ? ` with DTZ ${Math.abs(res.pos.dtz)}`
+      : res.pos?.dtm
+        ? ` with DTM ${Math.abs(res.pos.dtm)}`
+        : '';
+
+  const title = res.pos?.checkmate
+    ? h('h2', 'Checkmate')
+    : res.pos?.stalemate
+      ? h('h2', 'Stalemate')
+      : res.pos?.insufficient_material
+        ? h('h2', 'Insufficient material')
+        : h('h2', [capitalize(res.pos?.simpleCategory || 'unknown'), titleSuffix]);
+
+  return [
+    title,
+    tablebaseMoves(ctrl, res.moves, 'win', ctrl.setup.turn),
+    tablebaseMoves(ctrl, res.moves, 'unknown', undefined),
+    tablebaseMoves(ctrl, res.moves, 'draw', undefined),
+    tablebaseMoves(ctrl, res.moves, 'loss', opposite(ctrl.setup.turn)),
+  ];
 };
 
 const tablebaseMoves = (
   ctrl: Ctrl,
   moves: EnrichedTablebaseMove[],
-  moveCategory: MoveCategory,
+  moveCategory: SimpleCategory,
   winner?: Color,
 ): VNode | undefined => {
-  moves = moves.filter(move => move.moveCategory === moveCategory);
+  moves = moves.filter(move => move.simpleCategory === moveCategory);
   if (!moves.length) return;
   return h(
     'div.moves',
@@ -252,10 +276,10 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     icon(i),
   );
 
-const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
+const layout = (title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [
     h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
-    h('div.right-side', [h('div.inner', [right])]),
+    h('div.right-side', [h('div.inner', right)]),
     h('footer', [
       h('div.inner', [
         h('p', [

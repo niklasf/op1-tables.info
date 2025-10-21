@@ -19,13 +19,18 @@ export const relaxedParseFen = (fen: string | null | undefined): Result<Setup, F
 export interface EnrichedTablebaseMove extends LilaTablebaseMove {
   fen: string;
   conversion: boolean;
-  moveCategory: MoveCategory;
+  simpleCategory: SimpleCategory;
 }
 
-export const MOVE_CATEGORIES = ['loss', 'draw', 'unknown', 'win'] as const;
-export type MoveCategory = (typeof MOVE_CATEGORIES)[number];
+export interface EnrichedTablebasePosInfo extends LilaTablebasePosInfo {
+  simpleCategory: SimpleCategory;
+}
+
+export const SIMPLE_CATEGORIES = ['loss', 'draw', 'unknown', 'win'] as const;
+export type SimpleCategory = (typeof SIMPLE_CATEGORIES)[number];
 
 export interface TablebaseResponse {
+  pos?: EnrichedTablebasePosInfo;
   moves: EnrichedTablebaseMove[];
   error?: string;
 }
@@ -252,6 +257,22 @@ export class Ctrl {
     }
     const json: LilaTablebaseResponse = await res.json();
     return {
+      pos: {
+        checkmate: json.checkmate,
+        stalemate: json.stalemate,
+        insufficient_material: json.insufficient_material,
+        dtz: json.dtz,
+        dtc: json.dtc,
+        dtm: json.dtm,
+        category: json.category,
+        simpleCategory: json.category.includes('loss')
+          ? 'loss'
+          : json.category.includes('win')
+            ? 'win'
+            : json.category === 'draw'
+              ? 'draw'
+              : 'unknown',
+      },
       moves: json.moves
         .map(move => {
           const after = pos.value.clone();
@@ -260,7 +281,7 @@ export class Ctrl {
             ...move,
             conversion: move.san.includes('x') || move.san.includes('='),
             fen: makeFen(after.toSetup()),
-            moveCategory: move.category.includes('loss')
+            simpleCategory: move.category.includes('loss')
               ? 'win'
               : move.category.includes('win')
                 ? 'loss'
@@ -271,7 +292,7 @@ export class Ctrl {
           return enrichedMove;
         })
         .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
-        .sort((a, b) => MOVE_CATEGORIES.indexOf(b.moveCategory) - MOVE_CATEGORIES.indexOf(a.moveCategory)),
+        .sort((a, b) => SIMPLE_CATEGORIES.indexOf(b.simpleCategory) - SIMPLE_CATEGORIES.indexOf(a.simpleCategory)),
       error: '',
     };
   }
