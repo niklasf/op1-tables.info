@@ -9,6 +9,7 @@ import {
   SimpleCategory,
   relaxedParseFen,
 } from './ctrl.js';
+import { capitalize } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Setup } from 'chessops/setup';
 import { makeFen, parseFen } from 'chessops/fen';
@@ -143,7 +144,8 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
   if (res.error)
     return [
       h('div.panel', [
-        h('h2', res.error.message),
+        h('h2', res.error.title),
+        h('p', res.error.message),
         res.error.retry
           ? h('div.btn-group', [h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry')])
           : undefined,
@@ -329,8 +331,6 @@ const dtz50 = (): Array<string | VNode> => ['DTZ', h('sub', '50'), '′′'];
 const icon = (name: string): VNode => h(`span.icon.icon-${name}`);
 
 const spinner = (): VNode => h('div.spinner', [h('div.double-bounce1'), h('div.double-bounce2')]);
-
-const capitalize = (s: string): string => s.substring(0, 1).toUpperCase() + s.substring(1);
 
 const primaryClick = (f: (e: MouseEvent) => void): ((e: MouseEvent) => void) => {
   return (e: MouseEvent) => {

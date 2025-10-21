@@ -1,15 +1,16 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
 import { Piece, Move, SquareName, NormalMove } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { parseSquare, parseUci, makeSquare } from 'chessops/util';
+import { opposite, parseSquare, parseUci, makeSquare } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { SquareSet } from 'chessops/squareSet';
-import { Chess } from 'chessops/chess';
+import { Chess, IllegalSetup } from 'chessops/chess';
 import { setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
 import { Result } from '@badrap/result';
 import { Sync, sync } from './sync.js';
 import { Mousetrap } from './mousetrap.js';
+import { capitalize } from './util.js';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
@@ -36,7 +37,7 @@ export interface TablebaseResponse {
 }
 
 export interface TablebaseError {
-  kind: string;
+  title: string;
   message: string;
   retry: boolean;
 }
@@ -253,15 +254,24 @@ export class Ctrl {
     if (pos.isErr) {
       return {
         error: {
-          kind: 'illegal',
-          message: `Illegal position: ${pos.error}`,
+          title: 'Illegal position',
+          message:
+            pos.error.message == IllegalSetup.Empty
+              ? 'Board is empty'
+              : pos.error.message == IllegalSetup.OppositeCheck
+                ? `${capitalize(this.setup.turn)} to move, but ${capitalize(opposite(this.setup.turn))} in check`
+                : pos.error.message == IllegalSetup.PawnsOnBackrank
+                  ? 'Pawns on backrank'
+                  : pos.error.message == IllegalSetup.Kings
+                    ? 'Need exactly one king of each color'
+                    : '',
           retry: false,
         },
         moves: [],
       };
     }
 
-    const url = new URL('/standardX', 'https://tablebase.lichess.ovh');
+    const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
     url.searchParams.set('op1', 'always');
 
@@ -271,7 +281,7 @@ export class Ctrl {
     } catch (error) {
       return {
         error: {
-          kind: 'transient',
+          title: 'Network error',
           message: error.message,
           retry: true,
         },
@@ -281,8 +291,8 @@ export class Ctrl {
     if (!res.ok) {
       return {
         error: {
-          kind: 'transient',
-          message: `Tablebase error: HTTP ${res.status}`,
+          title: 'Transient error',
+          message: `Upstream request failed with HTTP ${res.status}`,
           retry: true,
         },
         moves: [],
