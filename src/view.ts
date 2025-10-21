@@ -5,6 +5,7 @@ import { Ctrl, DEFAULT_FEN, EnrichedTablebaseMove, MoveCategory, relaxedParseFen
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Setup } from 'chessops/setup';
 import { makeFen, parseFen } from 'chessops/fen';
+import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
 
 export const view = (ctrl: Ctrl): VNode => {
   return layout(
@@ -84,6 +85,8 @@ export const view = (ctrl: Ctrl): VNode => {
       ),
       h('div.btn-group', [
         setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
+        setupButton(ctrl, transformSetup(ctrl.setup, flipHorizontal), 'horizontal', 'Mirror horizontally'),
+        setupButton(ctrl, transformSetup(ctrl.setup, flipVertical), 'vertical', 'Mirror vertically'),
       ]),
       h(
         'form',

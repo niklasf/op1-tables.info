@@ -217,7 +217,7 @@ export class Ctrl {
   clearedBoardSetup(): Setup {
     return {
       ...this.setup,
-      board: parseBoardFen(DEFAULT_FEN).unwrap(),
+      board: parseFen(DEFAULT_FEN).unwrap().board,
       castlingRights: SquareSet.empty(),
       epSquare: undefined,
     };
