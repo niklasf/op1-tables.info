@@ -1,7 +1,7 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Piece, Move, SquareName, NormalMove, Color, COLORS } from 'chessops/types';
+import { Piece, Move, SquareName, NormalMove, Color, COLORS, Square } from 'chessops/types';
 import { Setup } from 'chessops/setup';
-import { opposite, parseSquare, parseUci, makeSquare } from 'chessops/util';
+import { defined, opposite, parseSquare, parseUci, makeSquare } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { SquareSet } from 'chessops/squareSet';
 import { Chess, IllegalSetup } from 'chessops/chess';
@@ -49,6 +49,7 @@ export class Ctrl {
   public flipped = false;
 
   private ground: CgApi | undefined;
+  private hovering: NormalMove | undefined;
 
   private abortController: AbortController | undefined;
   public tablebaseResponse: Sync<TablebaseResponse>;
@@ -96,19 +97,8 @@ export class Ctrl {
   }
 
   setHovering(move: NormalMove | undefined) {
-    this.withGround(ground =>
-      ground.setAutoShapes(
-        move
-          ? [
-              {
-                orig: makeSquare(move.from),
-                dest: makeSquare(move.to),
-                brush: 'green',
-              },
-            ]
-          : [],
-      ),
-    );
+    this.hovering = move;
+    this.updateAutoShapes();
   }
 
   setGround(ground: CgApi | undefined) {
@@ -150,6 +140,33 @@ export class Ctrl {
         },
         orientation: this.flipped ? 'black' : 'white',
       });
+    });
+    this.updateAutoShapes();
+  }
+
+  private updateAutoShapes() {
+    this.withGround(ground => {
+      const op1 = this.setup.board.occupied.size() >= 8 && this.op1();
+      ground.setAutoShapes([
+        ...(this.hovering
+          ? [
+              {
+                orig: makeSquare(this.hovering.from),
+                dest: makeSquare(this.hovering.to),
+                brush: 'green',
+              },
+            ]
+          : []),
+        ...(op1
+          ? [
+              {
+                orig: makeSquare(op1[0]),
+                dest: makeSquare(op1[1]),
+                brush: 'green',
+              },
+            ]
+          : []),
+      ]);
     });
   }
 
@@ -252,6 +269,29 @@ export class Ctrl {
         !this.setup.board.pieces(color, 'pawn').moreThanOne() &&
         this.setup.board[color].diff(this.setup.board.king).diff(this.setup.board.pawn).isEmpty(),
     );
+  }
+
+  op1(): [Square, Square] | undefined {
+    const whitePawns = this.setup.board.pieces('white', 'pawn');
+    const blackPawns = this.setup.board.pieces('black', 'pawn');
+    const blackWitness = whitePawns
+      .shl64(8)
+      .union(whitePawns.shl64(16))
+      .union(whitePawns.shl64(24))
+      .union(whitePawns.shl64(32))
+      .union(whitePawns.shl64(40))
+      .intersect(blackPawns)
+      .first();
+    const whiteWitness = blackPawns
+      .shr64(8)
+      .union(blackPawns.shr64(16))
+      .union(blackPawns.shr64(24))
+      .union(blackPawns.shr64(32))
+      .union(blackPawns.shr64(40))
+      .intersect(whitePawns)
+      .last();
+    if (!defined(whiteWitness) || !defined(blackWitness)) return;
+    return this.setup.turn === 'white' ? [whiteWitness, blackWitness] : [blackWitness, whiteWitness];
   }
 
   async fetchTablebase(): Promise<TablebaseResponse> {
