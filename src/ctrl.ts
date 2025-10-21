@@ -272,7 +272,7 @@ export class Ctrl {
         })
         .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
         .sort((a, b) => MOVE_CATEGORIES.indexOf(b.moveCategory) - MOVE_CATEGORIES.indexOf(a.moveCategory)),
-      error: 'Implementation in progress',
+      error: '',
     };
   }
 }

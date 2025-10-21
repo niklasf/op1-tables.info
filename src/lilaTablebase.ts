@@ -18,4 +18,14 @@ interface LilaTablebasePosInfo {
   category: LilaTablebaseCategory;
 }
 
-type LilaTablebaseCategory = 'win' | 'unknown' | 'syzygy-win' | 'maybe-win' | 'cursed-win' | 'draw' | 'blessed-loss' | 'maybe-loss' | 'syzygy-loss' | 'loss';
+type LilaTablebaseCategory =
+  | 'win'
+  | 'unknown'
+  | 'syzygy-win'
+  | 'maybe-win'
+  | 'cursed-win'
+  | 'draw'
+  | 'blessed-loss'
+  | 'maybe-loss'
+  | 'syzygy-loss'
+  | 'loss';

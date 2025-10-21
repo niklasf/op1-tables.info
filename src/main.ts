@@ -16,7 +16,7 @@ const start = (element: Element) => {
   ctrl = new Ctrl(redraw);
 
   redraw();
-}
+};
 
 window.addEventListener('DOMContentLoaded', () => {
   start(document.body);

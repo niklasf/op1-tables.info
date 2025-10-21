@@ -130,7 +130,7 @@ export const view = (ctrl: Ctrl): VNode => {
       'div',
       ctrl.tablebaseResponse.sync
         ? [
-            ctrl.tablebaseResponse.sync.error,
+            ctrl.tablebaseResponse.sync.error || undefined,
             tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'win', ctrl.setup.turn),
             tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'unknown', undefined),
             tablebaseMoves(ctrl, ctrl.tablebaseResponse.sync.moves, 'draw', undefined),
