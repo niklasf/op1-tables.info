@@ -120,7 +120,7 @@ a:visited {
   border-bottom-right-radius: 4px;
 }
 
-.moves span {
+badge {
   float: right;
   min-width: 10px;
   padding: 3px 7px;
@@ -133,19 +133,19 @@ a:visited {
   border: 1px solid var(--border-color);
   border-radius: 4px;
 }
-.moves span + span {
+.moves badge + badge {
   margin-right: 5px;
 }
-.moves span.draw {
+badge.draw {
   background-color: var(--draw-bg-color);
   color: var(--draw-color);
 }
-.moves span.white {
+badge.white {
   background-color: var(--white-bg-color);
   color: var(--white-color);
   ---border: 1px solid var(--white-color);
 }
-.moves span.black {
+badge.black {
   background-color: var(--black-bg-color);
   color: var(--black-color);
   ---border: 1px solid var(--black-color);
@@ -217,6 +217,10 @@ footer > .inner {
 .left-side > .inner,
 .right-side > .inner {
   padding: 40px 0;
+}
+
+.meta-links a {
+    margin-right: 0.5em;
 }
 
 /* Single column */

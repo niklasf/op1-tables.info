@@ -9,9 +9,9 @@ import {
   SimpleCategory,
   relaxedParseFen,
 } from './ctrl.js';
-import { capitalize } from './util.js';
+import { capitalize, strRepeat } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
-import { Setup } from 'chessops/setup';
+import { Material, Setup } from 'chessops/setup';
 import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
 
@@ -182,6 +182,9 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
       : ctrl.setup.board.occupied.size() > 8
         ? h('p.panel', 'The tablebase only covers positions with up to 8 pieces.')
         : undefined,
+    ctrl.getFen() == DEFAULT_FEN
+      ? h('div.panel', [samplePosition(ctrl, 'R7/8/8/8/7q/2K1B2p/7P/2Bk4 w - - 0 1', 584)])
+      : undefined,
     ctrl.setup.board.occupied.size() == 8 && veryWeakSide
       ? h(
           'p.panel',
@@ -198,6 +201,27 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
     tablebaseMoves(ctrl, res.moves, 'unknown', undefined),
     tablebaseMoves(ctrl, res.moves, 'draw', undefined),
     tablebaseMoves(ctrl, res.moves, 'loss', opposite(ctrl.setup.turn)),
+    h('div.meta-links', [
+      h('a', { attrs: { href: 'https://lichess.org/analysis/standard/' + ctrl.getFen().replace(/ /g, '_') } }, [
+        h('span.icon.icon-external'),
+        ' lichess.org',
+      ]),
+      ' ',
+      h('a', { attrs: { href: 'https://syzygy-tables.info/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, [
+        h('span.icon.icon-external'),
+        ' syzygy-tables.info',
+      ]),
+      ' ',
+      h(
+        'a',
+        {
+          attrs: {
+            href: 'https://tablebase.lichess.ovh/standard?fen=' + ctrl.getFen().replace(/ /g, '_') + '&op1=always',
+          },
+        },
+        [h('span.icon.icon-download'), ' JSON'],
+      ),
+    ]),
   ];
 };
 
@@ -213,24 +237,24 @@ const tablebaseMoves = (
     'div.moves',
     moves.map(move => {
       const badges = [];
-      if (move.category === 'unknown') badges.push(' ', h('span.unknown', 'Unknown'));
-      if (move.checkmate) badges.push(' ', h(`span.${winner}`, 'Checkmate'));
-      else if (move.stalemate) badges.push(' ', h('span.draw', 'Stalemate'));
-      else if (move.insufficient_material) badges.push(' ', h('span.draw', 'Insufficient material'));
-      else if (move.category === 'draw') badges.push(' ', h('span.draw', 'Draw'));
+      if (move.category === 'unknown') badges.push(' ', h('badge.unknown', 'Unknown'));
+      if (move.checkmate) badges.push(' ', h(`badge.${winner}`, 'Checkmate'));
+      else if (move.stalemate) badges.push(' ', h('badge.draw', 'Stalemate'));
+      else if (move.insufficient_material) badges.push(' ', h('badge.draw', 'Insufficient material'));
+      else if (move.category === 'draw') badges.push(' ', h('badge.draw', 'Draw'));
       else {
-        if (move.dtm) badges.push(' ', h(`span.${winner}`, `DTM ${Math.abs(move.dtm)}`));
+        if (move.dtm) badges.push(' ', h(`badge.${winner}`, `DTM ${Math.abs(move.dtm)}`));
         if (move.dtc)
           badges.push(
             ' ',
             h(
-              `span.${winner}`,
+              `badge.${winner}`,
               move.san.includes('=') || move.san.includes('x')
                 ? 'Conversion'
                 : `${capitalize(moveCategory)} with DTC ${Math.abs(move.dtc)}`,
             ),
           );
-        if (move.dtz) badges.push(' ', h(`span.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
+        if (move.dtz) badges.push(' ', h(`badge.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
       }
       return h(
         'a',
@@ -311,6 +335,44 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     },
     icon(i),
   );
+
+const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
+  const setup = parseFen(fen).unwrap();
+  const whiteWin = dtc > 0 !== (setup.turn === 'black');
+  const material = Material.fromBoard(setup.board);
+  return h(
+    'a.panel',
+    {
+      attrs: {
+        href: '/?fen=' + fen.replace(/ /g, '_'),
+        title: fen,
+      },
+      on: {
+        click: primaryClick(() => ctrl.push(setup)),
+      },
+    },
+    [
+      h('span.white', [
+        strRepeat('K', material.white.king),
+        strRepeat('Q', material.white.queen),
+        strRepeat('R', material.white.rook),
+        strRepeat('B', material.white.bishop),
+        strRepeat('N', material.white.knight),
+        strRepeat('P', material.white.pawn),
+      ]),
+      h('span.black', [
+        strRepeat('K', material.black.king),
+        strRepeat('Q', material.black.queen),
+        strRepeat('R', material.black.rook),
+        strRepeat('B', material.black.bishop),
+        strRepeat('N', material.black.knight),
+        strRepeat('P', material.black.pawn),
+      ]),
+      ' ',
+      h(`badge.${whiteWin ? 'white' : 'black'}`, `DTC ${Math.abs(dtc)}`),
+    ],
+  );
+};
 
 const layout = (title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [
