@@ -188,6 +188,13 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
           `The 8-piece tablebase excludes positions where one side is too weak. ${capitalize(veryWeakSide)} does not have more than 1 pawn of material.`,
         )
       : undefined,
+    ctrl.setup.board.occupied.size() == 8 && !ctrl.opposedPawn()
+      ? h('p.panel', [
+          'The 8-piece tablebase only covers positions with at least one pair of opposed pawns, short ',
+          h('em', 'op1'),
+          '.',
+        ])
+      : undefined,
     tablebaseMoves(ctrl, res.moves, 'unknown', undefined),
     tablebaseMoves(ctrl, res.moves, 'draw', undefined),
     tablebaseMoves(ctrl, res.moves, 'loss', opposite(ctrl.setup.turn)),

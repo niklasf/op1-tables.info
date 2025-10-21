@@ -1,5 +1,5 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
-import { Piece, Move, SquareName, NormalMove, Color, COLORS, Square } from 'chessops/types';
+import { Piece, Move, SquareName, NormalMove, Color, COLORS } from 'chessops/types';
 import { Setup } from 'chessops/setup';
 import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile, squareFromCoords } from 'chessops/util';
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
@@ -146,8 +146,8 @@ export class Ctrl {
 
   private updateAutoShapes() {
     this.withGround(ground => {
-      const op1 = this.setup.board.occupied.size() >= 8 && this.op1();
-      const refuteOp1 = (this.setup.board.occupied.size() >= 8 && !op1 && this.refuteOp1()) || [];
+      const opposedPawn = this.opposedPawn();
+      console.log(this.promotionTargets('white'));
       ground.setAutoShapes([
         ...(this.hovering
           ? [
@@ -158,21 +158,23 @@ export class Ctrl {
               },
             ]
           : []),
-        ...(op1
+        ...(this.setup.board.occupied.size() >= 8 && opposedPawn
           ? [
               {
-                orig: makeSquare(op1[0]),
-                dest: makeSquare(op1[1]),
+                orig: makeSquare(opposedPawn.from),
+                dest: makeSquare(opposedPawn.to),
                 brush: 'paleGreen',
-                label: { text: 'OP1' },
+                label: { text: 'Op1' },
               },
             ]
           : []),
-        ...refuteOp1.map(r => ({
-          orig: makeSquare(r[0]),
-          dest: makeSquare(r[1]),
-          brush: 'paleRed',
-        })),
+        ...(this.setup.board.occupied.size() === 8 && !opposedPawn
+          ? [...this.promotionTargets('white'), ...this.promotionTargets('black')].map(r => ({
+              orig: makeSquare(r.from),
+              dest: makeSquare(r.to),
+              brush: 'paleRed',
+            }))
+          : []),
       ]);
     });
   }
@@ -278,7 +280,7 @@ export class Ctrl {
     );
   }
 
-  op1(): [Square, Square] | undefined {
+  opposedPawn(): NormalMove | undefined {
     const whitePawns = this.setup.board.pieces('white', 'pawn');
     const blackPawns = this.setup.board.pieces('black', 'pawn');
     const blackWitness = whitePawns
@@ -290,21 +292,23 @@ export class Ctrl {
       .intersect(blackPawns)
       .first();
     if (!blackWitness) return;
-    const whiteWitness = Array.from(whitePawns.reversed()).find(
-      p => p < blackWitness && squareFile(p) == squareFile(blackWitness),
+    const whiteWitness = Array.from(whitePawns.intersect(SquareSet.fromFile(squareFile(blackWitness))).reversed()).find(
+      p => p < blackWitness,
     );
     if (!whiteWitness) return;
-    return this.setup.turn === 'white' ? [whiteWitness, blackWitness] : [blackWitness, whiteWitness];
+    return this.setup.turn === 'white'
+      ? { from: whiteWitness, to: blackWitness }
+      : { from: blackWitness, to: whiteWitness };
   }
 
-  refuteOp1(): [Square, Square][] {
+  promotionTargets(color: Color): NormalMove[] {
     return [0, 1, 2, 3, 4, 5, 6, 7]
       .map(file => {
-        const pawns = SquareSet.fromFile(file).intersect(this.setup.board.pieces(this.setup.turn, 'pawn'));
-        return this.setup.turn === 'white' ? pawns.last() : pawns.first();
+        const pawns = SquareSet.fromFile(file).intersect(this.setup.board.pieces(color, 'pawn'));
+        const pawn = color === 'white' ? pawns.last() : pawns.first();
+        return defined(pawn) ? { from: pawn, to: squareFromCoords(file, color === 'white' ? 7 : 0)! } : undefined;
       })
-      .filter(defined)
-      .map(pawn => [pawn, squareFromCoords(squareFile(pawn), this.setup.turn === 'white' ? 7 : 0)!]);
+      .filter(defined);
   }
 
   async fetchTablebase(): Promise<TablebaseResponse> {
