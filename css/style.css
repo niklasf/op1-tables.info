@@ -152,7 +152,6 @@ a:visited {
     padding: 6px 12px;
     text-decoration: none;
     line-height: 1.42;
-    font-size: 14px;
     margin-left: -1px;
     border: 1px solid var(--border-color);
 }
@@ -160,6 +159,7 @@ a:visited {
     flex-grow: 1;
     background-color: (--body-color);
     color: var(--body-bg-color);
+    font-size: 13px;
 }
 .btn-group .btn {
     touch-action: manipulation;
@@ -167,6 +167,7 @@ a:visited {
     cursor: pointer;
     color: var(--body-color);
     background-color: var(--body-bg-color);
+    font-size: 14px;
 }
 .btn-group :first-child {
     border-top-left-radius: 4px;
@@ -193,7 +194,7 @@ footer > .inner {
 
 footer > .inner {
     text-align: center;
-    padding-top: 40px;
+    padding-top: 20px;
 }
 
 .left-side > .inner {
@@ -232,6 +233,39 @@ footer > .inner {
       bottom: 40px;
       right: 55%;
   }
+}
+
+/* Two columns, but limited height */
+
+@media (min-width: 680px) and (max-height: 880px) {
+    footer > .inner {
+        bottom: 10px;
+    }
+}
+@media (min-width: 680px) and (max-height: 860px) {
+    footer > .inner {
+        position: relative;
+        right: auto;
+        margin-left: 55%;
+    }
+}
+@media (min-width: 680px) and (max-height: 730px) {
+    h1 {
+        padding: 10px 0;
+    }
+}
+@media (min-width: 680px) and (max-height: 670px) {
+    h1 {
+        display: none;
+    }
+    #stm-toolbar {
+        margin-top: 10px;
+    }
+}
+@media (min-width: 680px) and (max-height: 590px) {
+    #board-toolbar {
+        display: none;
+    }
 }
 
 /* Spinner */

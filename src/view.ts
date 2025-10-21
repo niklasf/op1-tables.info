@@ -22,18 +22,20 @@ export const view = (ctrl: Ctrl): VNode => {
       'Op1 endgame tablebase',
     ),
     [
-      h('div.btn-group', [turnButton(ctrl, 'white'), turnButton(ctrl, 'black')]),
-      h(
-        'div.btn-group',
+      h('div#stm-toolbar', [
+        h('div.btn-group', [turnButton(ctrl, 'white'), turnButton(ctrl, 'black')]),
         h(
-          `button.btn${ctrl.editMode ? '.active' : ''}`,
-          {
-            attrs: { title: 'Edit mode: Do not switch sides when playing moves on the board (e)' },
-            on: { click: () => ctrl.toggleEditMode() },
-          },
-          icon(ctrl.editMode ? 'lock' : 'lock-open')
+          'div.btn-group',
+          h(
+            `button.btn${ctrl.editMode ? '.active' : ''}`,
+            {
+              attrs: { title: 'Edit mode: Do not switch sides when playing moves on the board (e)' },
+              on: { click: () => ctrl.toggleEditMode() },
+            },
+            icon(ctrl.editMode ? 'lock' : 'lock-open'),
+          ),
         ),
-      ),
+      ]),
       sparePieces(ctrl, ctrl.flipped ? 'white' : 'black', 'top'),
       h('div.cg-wrap', {
         hook: {
@@ -71,22 +73,21 @@ export const view = (ctrl: Ctrl): VNode => {
         },
       }),
       sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
-      h(
-        'div.btn-group',
+      h('div#board-toolbar', [
         h(
-          `button.btn${ctrl.flipped ? '.active' : ''}`,
-          { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } },
-          icon('rotate'),
+          'div.btn-group',
+          h(
+            `button.btn${ctrl.flipped ? '.active' : ''}`,
+            { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } },
+            icon('rotate'),
+          ),
         ),
-      ),
-      h(
-        'div.btn-group',
-        setupButton(ctrl, ctrl.clearedBoardSetup(), 'eraser', 'Clear board'),
-      ),
-      h('div.btn-group', [
-        setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
-        setupButton(ctrl, transformSetup(ctrl.setup, flipHorizontal), 'horizontal', 'Mirror horizontally'),
-        setupButton(ctrl, transformSetup(ctrl.setup, flipVertical), 'vertical', 'Mirror vertically'),
+        h('div.btn-group', setupButton(ctrl, ctrl.clearedBoardSetup(), 'eraser', 'Clear board')),
+        h('div.btn-group', [
+          setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
+          setupButton(ctrl, transformSetup(ctrl.setup, flipHorizontal), 'horizontal', 'Mirror horizontally'),
+          setupButton(ctrl, transformSetup(ctrl.setup, flipVertical), 'vertical', 'Mirror vertically'),
+        ]),
       ]),
       h(
         'form',
@@ -236,19 +237,20 @@ const turnButton = (ctrl: Ctrl, color: Color): VNode => {
   );
 };
 
-const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode => h(
-  'a.btn',
-  {
-    attrs: {
-      href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
-      title,
+const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode =>
+  h(
+    'a.btn',
+    {
+      attrs: {
+        href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
+        title,
+      },
+      on: {
+        click: primaryClick(() => ctrl.push(setup)),
+      },
     },
-    on: {
-      click: primaryClick(() => ctrl.push(setup)),
-    },
-  },
-  icon(i),
-);
+    icon(i),
+  );
 
 const layout = (title: VNode, left: VNodes, right: VNode): VNode => {
   return h('body', [
