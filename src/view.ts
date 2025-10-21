@@ -140,13 +140,15 @@ export const view = (ctrl: Ctrl): VNode => {
 };
 
 const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => {
-  if (res.error) return [
-    h('div.panel', [
-      h('h2', res.error),
-      h('div.btn-group',
-        h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry'))
-    ])
-  ];
+  if (res.error)
+    return [
+      h('div.panel', [
+        h('h2', res.error.message),
+        res.error.retry
+          ? h('div.btn-group', [h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry')])
+          : undefined,
+      ]),
+    ];
 
   const titleSuffix = res.pos?.dtc
     ? ` with DTC ${Math.abs(res.pos.dtc)}`
@@ -161,8 +163,8 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
     : res.pos?.stalemate
       ? h('h2.panel', 'Stalemate')
       : res.pos?.insufficient_material
-        ? h('h2.panel', 'Insufficient material') :
-    h('h2.panel', [capitalize(res.pos?.simpleCategory || 'unknown'), titleSuffix]);
+        ? h('h2.panel', 'Insufficient material')
+        : h('h2.panel', [capitalize(res.pos?.simpleCategory || 'unknown'), titleSuffix]);
 
   return [
     title,

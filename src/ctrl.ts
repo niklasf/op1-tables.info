@@ -30,9 +30,15 @@ export const SIMPLE_CATEGORIES = ['loss', 'draw', 'unknown', 'win'] as const;
 export type SimpleCategory = (typeof SIMPLE_CATEGORIES)[number];
 
 export interface TablebaseResponse {
+  error?: TablebaseError;
   pos?: EnrichedTablebasePosInfo;
   moves: EnrichedTablebaseMove[];
-  error?: string;
+}
+
+export interface TablebaseError {
+  kind: string;
+  message: string;
+  retry: boolean;
 }
 
 export class Ctrl {
@@ -245,10 +251,17 @@ export class Ctrl {
 
     const pos = Chess.fromSetup(this.setup);
     if (pos.isErr) {
-      return { moves: [], error: `Illegal position: ${pos.error}` };
+      return {
+        error: {
+          kind: 'illegal',
+          message: `Illegal position: ${pos.error}`,
+          retry: false,
+        },
+        moves: [],
+      };
     }
 
-    const url = new URL('/standard', 'https://tablebase.lichess.ovh');
+    const url = new URL('/standardX', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
     url.searchParams.set('op1', 'always');
 
@@ -256,11 +269,26 @@ export class Ctrl {
     try {
       res = await fetch(url.href, { signal: this.abortController.signal });
     } catch (error) {
-      return { moves: [], error: error.message };
+      return {
+        error: {
+          kind: 'transient',
+          message: error.message,
+          retry: true,
+        },
+        moves: [],
+      };
     }
     if (!res.ok) {
-      return { moves: [], error: `Tablebase error: HTTP ${res.status}` };
+      return {
+        error: {
+          kind: 'transient',
+          message: `Tablebase error: HTTP ${res.status}`,
+          retry: true,
+        },
+        moves: [],
+      };
     }
+
     const json: LilaTablebaseResponse = await res.json();
     return {
       pos: {
@@ -299,7 +327,6 @@ export class Ctrl {
         })
         .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
         .sort((a, b) => SIMPLE_CATEGORIES.indexOf(b.simpleCategory) - SIMPLE_CATEGORIES.indexOf(a.simpleCategory)),
-      error: '',
     };
   }
 }
