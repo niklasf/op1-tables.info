@@ -259,7 +259,7 @@ const tablebaseMoves = (
         {
           attrs: {
             href: '/?fen=' + move.fen.replace(/ /g, '_'),
-            title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play best move (space)' : '',
+            title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play top move (space)' : '',
           },
           on: {
             click: primaryClick(() => {
