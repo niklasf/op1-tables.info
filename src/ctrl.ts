@@ -347,7 +347,7 @@ export class Ctrl {
 
     const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen());
-    url.searchParams.set('op1', 'always');
+    url.searchParams.set('dtc', 'always');
 
     let res;
     try {
