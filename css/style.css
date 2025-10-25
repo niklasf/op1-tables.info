@@ -155,7 +155,7 @@ badge.black {
 
 .btn-group {
   display: inline-flex;
-  margin: 0.5em 0.2em;
+  margin: 0 0.2em;
 }
 
 .btn-group-line {
@@ -221,6 +221,10 @@ footer > .inner {
 .left-side > .inner,
 .right-side > .inner {
   padding: 40px 0;
+}
+
+#board-toolbar {
+  margin: 10px 0;
 }
 
 .meta-links a {
