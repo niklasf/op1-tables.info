@@ -110,7 +110,7 @@ export const view = (ctrl: Ctrl): VNode => {
             },
           },
         },
-        h('div.btn-group', [
+        h('div.btn-group.btn-group-line', [
           h('input', {
             attrs: {
               type: 'text',

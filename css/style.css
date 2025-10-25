@@ -158,6 +158,10 @@ badge.black {
   margin: 0.5em 0.2em;
 }
 
+.btn-group-line {
+    display: flex;
+}
+
 .btn-group .btn,
 .btn-group input {
   text-align: center;
