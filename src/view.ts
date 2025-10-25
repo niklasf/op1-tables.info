@@ -249,9 +249,7 @@ const tablebaseMoves = (
             ' ',
             h(
               `badge.${winner}`,
-              move.san.includes('=') || move.san.includes('x')
-                ? 'Conversion'
-                : `${capitalize(moveCategory)} with DTC ${Math.abs(move.dtc)}`,
+              move.conversion ? 'Conversion' : `${capitalize(moveCategory)} with DTC ${Math.abs(move.dtc)}`,
             ),
           );
         if (move.dtz) badges.push(' ', h(`badge.${winner}`, move.zeroing ? 'Zeroing' : `DTZ ${Math.abs(move.dtz)}`));
