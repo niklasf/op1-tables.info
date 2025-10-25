@@ -216,7 +216,7 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
         'a',
         {
           attrs: {
-            href: 'https://tablebase.lichess.ovh/standard?fen=' + ctrl.getFen().replace(/ /g, '_') + '&op1=always',
+            href: ctrl.apiUrl().href,
           },
         },
         [h('span.icon.icon-download'), ' JSON'],

@@ -310,6 +310,13 @@ export class Ctrl {
       .filter(defined);
   }
 
+  apiUrl(): URL {
+    const url = new URL('/standard', 'https://tablebase.lichess.ovh');
+    url.searchParams.set('fen', this.getFen().replace(/\s/g, '_'));
+    url.searchParams.set('dtc', 'always');
+    return url;
+  }
+
   async fetchTablebase(): Promise<TablebaseResponse> {
     this.abortController?.abort();
     this.abortController = new AbortController();
@@ -345,13 +352,9 @@ export class Ctrl {
         moves: [],
       };
 
-    const url = new URL('/standard', 'https://tablebase.lichess.ovh');
-    url.searchParams.set('fen', this.getFen());
-    url.searchParams.set('dtc', 'always');
-
     let res;
     try {
-      res = await fetch(url.href, { signal: this.abortController.signal });
+      res = await fetch(this.apiUrl().href, { signal: this.abortController.signal });
     } catch (error) {
       return {
         error: {
