@@ -5,16 +5,17 @@ interface LilaTablebaseResponse extends LilaTablebasePosInfo {
 interface LilaTablebaseMove extends LilaTablebasePosInfo {
   uci: string;
   san: string;
-  zeroing: boolean;
+  zeroing?: boolean;
+  conversion?: boolean;
 }
 
 interface LilaTablebasePosInfo {
-  checkmate: boolean;
-  stalemate: boolean;
-  insufficient_material: boolean;
-  dtz: number | null;
-  dtm: number | null;
-  dtc: number | null;
+  checkmate?: boolean;
+  stalemate?: boolean;
+  insufficient_material?: boolean;
+  dtz?: number | null;
+  dtm?: number | null;
+  dtc?: number | null;
   category: LilaTablebaseCategory;
 }
 
