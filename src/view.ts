@@ -147,7 +147,7 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
       h('p.panel', [
         res.error.message,
         res.error.retry
-          ? h('div.btn-group', [h('a.btn', { attrs: { href: '/?fen=' + ctrl.getFen().replace(/ /g, '_') } }, 'Retry')])
+          ? h('div.btn-group', [h('a.btn', { attrs: { href: ctrl.fenUrl(ctrl.getFen()) } }, 'Retry')])
           : undefined,
       ]),
     ];
@@ -216,7 +216,7 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
         'a',
         {
           attrs: {
-            href: ctrl.apiUrl().href,
+            href: ctrl.apiUrl(),
           },
         },
         [h('span.icon.icon-download'), ' JSON'],
@@ -258,7 +258,7 @@ const tablebaseMoves = (
         'a',
         {
           attrs: {
-            href: '/?fen=' + move.fen.replace(/ /g, '_'),
+            href: ctrl.fenUrl(move.fen),
             title: move === ctrl.tablebaseResponse.sync?.moves[0] ? 'Play top move (space)' : '',
           },
           on: {
@@ -308,7 +308,7 @@ const turnButton = (ctrl: Ctrl, color: Color): VNode => {
     `a.btn${color === ctrl.setup.turn ? '.active' : ''}`,
     {
       attrs: {
-        href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
+        href: ctrl.fenUrl(makeFen(setup)),
         title: `Set ${color} to move (${color.substring(0, 1)})`,
       },
       on: {
@@ -324,7 +324,7 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     'a.btn',
     {
       attrs: {
-        href: '/?fen=' + makeFen(setup).replace(/ /g, '_'),
+        href: ctrl.fenUrl(makeFen(setup)),
         title,
       },
       on: {
@@ -342,7 +342,7 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
     'a.panel',
     {
       attrs: {
-        href: '/?fen=' + fen.replace(/ /g, '_'),
+        href: ctrl.fenUrl(fen),
         title: fen,
       },
       on: {

@@ -310,11 +310,15 @@ export class Ctrl {
       .filter(defined);
   }
 
-  apiUrl(): URL {
+  apiUrl(): string {
     const url = new URL('/standard', 'https://tablebase.lichess.ovh');
     url.searchParams.set('fen', this.getFen().replace(/\s/g, '_'));
     url.searchParams.set('dtc', 'always');
-    return url;
+    return url.href;
+  }
+
+  fenUrl(fen: string): string {
+    return '/?fen=' + fen.replace(/\s/g, '_');
   }
 
   async fetchTablebase(): Promise<TablebaseResponse> {
@@ -354,7 +358,7 @@ export class Ctrl {
 
     let res;
     try {
-      res = await fetch(this.apiUrl().href, { signal: this.abortController.signal });
+      res = await fetch(this.apiUrl(), { signal: this.abortController.signal });
     } catch (error) {
       return {
         error: {
