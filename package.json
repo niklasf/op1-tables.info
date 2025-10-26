@@ -1,5 +1,5 @@
 {
-  "name": "op1-tables.com",
+  "name": "op1-tables.info",
   "version": "1.0.0",
   "private": true,
   "description": "User interface to probe 8-piece op1 tablebase and statistics",
@@ -10,17 +10,16 @@
     "endgame",
     "tablebase"
   ],
-  "homepage": "https://op1-tables.com",
+  "homepage": "https://op1-tables.info",
   "bugs": {
-    "url": "https://github.com/niklasf/op1-tables.com/issues",
+    "url": "https://github.com/niklasf/op1-tables.info/issues",
     "email": "niklas.fiekas@backscattering.de"
   },
-  "license": "AGPL-3.0-or-later",
   "author": {
     "name": "Niklas Fiekas",
     "email": "niklas.fiekas@backscattering.de"
   },
-  "repository": "https://github.com/niklasf/op1-tables.com",
+  "repository": "https://github.com/niklasf/op1-tables.info",
   "dependencies": {
     "@badrap/result": "^0.3.1",
     "@lichess-org/chessground": "^9.8.3",
