@@ -5,12 +5,13 @@ import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile, squar
 import { FenError, makeFen, parseBoardFen, parseFen, makeBoardFen } from 'chessops/fen';
 import { SquareSet } from 'chessops/squareSet';
 import { Chess, IllegalSetup, isStandardMaterial } from 'chessops/chess';
-import { setupEquals } from 'chessops/setup';
+import { Material, setupEquals } from 'chessops/setup';
 import { chessgroundDests, chessgroundMove } from 'chessops/compat';
 import { Result } from '@badrap/result';
 import { Sync, sync } from './sync.js';
 import { Mousetrap } from './mousetrap.js';
-import { capitalize } from './util.js';
+import { capitalize, materialSideToString, normalizeMaterial } from './util.js';
+import { Endgames } from './endgames.js';
 
 export const DEFAULT_FEN = '4k3/8/8/8/8/8/8/4K3 w - - 0 1';
 
@@ -36,14 +37,9 @@ export interface TablebaseResponse {
   moves: EnrichedTablebaseMove[];
 }
 
-export interface Endgame {
-  fen: string;
-  dtc: number;
-}
-
-export interface Endgames {
+export interface EnrichedEndgames extends Endgames {
+  url: string;
   error?: TablebaseError;
-  endgames: Endgame[];
 }
 
 export interface TablebaseError {
@@ -63,7 +59,7 @@ export class Ctrl {
 
   private abortController: AbortController | undefined;
   public tablebaseResponse: Sync<TablebaseResponse>;
-  public endgames: Sync<Endgames>;
+  public endgames?: Sync<EnrichedEndgames>;
 
   constructor(private readonly redraw: () => void) {
     this.setup = relaxedParseFen(new URLSearchParams(location.search).get('fen')).unwrap(
@@ -439,14 +435,20 @@ export class Ctrl {
     };
   }
 
-  private async fetchEndgames(signal: AbortSignal): Promise<Endgames> {
+  private async fetchEndgames(signal: AbortSignal): Promise<EnrichedEndgames> {
+    const normalized = normalizeMaterial(Material.fromBoard(this.setup.board));
+    const url =
+      this.getFen() === DEFAULT_FEN
+        ? '/endgames/index.json'
+        : `/endgames/${materialSideToString(normalized.white).toLowerCase()}${materialSideToString(normalized.black).toLowerCase()}.json`;
+    if (this.endgames?.sync?.url === url) return this.endgames.sync;
+
     let res;
     try {
-      res = await fetch('/endgames.json', {
-        signal,
-      });
+      res = await fetch(url, { signal });
     } catch (error) {
       return {
+        url: '',
         error: {
           title: 'Network error',
           message: error.message,
@@ -456,8 +458,16 @@ export class Ctrl {
       };
     }
 
+    if (res.status === 404) {
+      return {
+        url,
+        endgames: [],
+      };
+    }
+
     if (!res.ok) {
       return {
+        url: '',
         error: {
           title: 'Transient error',
           message: `Endgame request failed with HTTP ${res.status}`,
@@ -467,7 +477,7 @@ export class Ctrl {
       };
     }
 
-    const endgames: Endgame[] = await res.json();
-    return { endgames };
+    const endgames: Endgames = await res.json();
+    return { ...endgames, url };
   }
 }

@@ -6,11 +6,11 @@ import {
   DEFAULT_FEN,
   EnrichedTablebaseMove,
   TablebaseResponse,
-  Endgames,
   SimpleCategory,
   relaxedParseFen,
+  EnrichedEndgames,
 } from './ctrl.js';
-import { capitalize, strRepeat, shiftLeft, shiftRight, shiftDown, shiftUp } from './util.js';
+import { capitalize, shiftRight, shiftUp, materialSideToString } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Material, Setup } from 'chessops/setup';
 import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
@@ -145,7 +145,7 @@ export const view = (ctrl: Ctrl): VNode => {
     ],
     [
       ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
-      ...(ctrl.tablebaseResponse.sync && ctrl.endgames.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : [spinner()]),
+      ...(ctrl.tablebaseResponse.sync && ctrl.endgames?.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : [spinner()]),
     ]
   );
 };
@@ -341,10 +341,10 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     icon(i),
   );
 
-const sampleEndgames = (ctrl: Ctrl, endgames: Endgames): VNode[] => {
+const sampleEndgames = (ctrl: Ctrl, endgames: EnrichedEndgames): VNode[] => {
   if (!endgames.endgames.length) return [];
   return [
-    h('h2.panel.secondary', '8-piece endgames'),
+    h('h2.panel.secondary', 'Maximum DTC'),
     h('div.group-panel', endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)))
   ];
 };
@@ -365,22 +365,8 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
       },
     },
     [
-      h('span.white', [
-        strRepeat('K', material.white.king),
-        strRepeat('Q', material.white.queen),
-        strRepeat('R', material.white.rook),
-        strRepeat('B', material.white.bishop),
-        strRepeat('N', material.white.knight),
-        strRepeat('P', material.white.pawn),
-      ]),
-      h('span.black', [
-        strRepeat('K', material.black.king),
-        strRepeat('Q', material.black.queen),
-        strRepeat('R', material.black.rook),
-        strRepeat('B', material.black.bishop),
-        strRepeat('N', material.black.knight),
-        strRepeat('P', material.black.pawn),
-      ]),
+      h('span.white', materialSideToString(material.white)),
+      h('span.black', materialSideToString(material.black)),
       ' ',
       h(`badge.${whiteWin ? 'white' : 'black'}`, `DTC ${Math.abs(dtc)}`),
     ],
