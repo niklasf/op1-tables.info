@@ -19,7 +19,8 @@ import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform
 type MaybeVNode = VNode | string | undefined;
 
 export const view = (ctrl: Ctrl): VNode => {
-  return layout(ctrl,
+  return layout(
+    ctrl,
     h(
       'a',
       {
@@ -143,11 +144,14 @@ export const view = (ctrl: Ctrl): VNode => {
         ]),
       ),
     ],
-    ctrl.about ? about() :
-    [
-      ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
-      ...(ctrl.tablebaseResponse.sync && ctrl.endgames?.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : [spinner()]),
-    ]
+    ctrl.about
+      ? about()
+      : [
+          ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
+          ...(ctrl.tablebaseResponse.sync && ctrl.endgames?.sync
+            ? sampleEndgames(ctrl, ctrl.endgames.sync)
+            : [spinner()]),
+        ],
   );
 };
 
@@ -346,7 +350,21 @@ const sampleEndgames = (ctrl: Ctrl, endgames: EnrichedEndgames): VNode[] => {
   if (!endgames.endgames.length) return [];
   return [
     h('h2.panel.secondary', 'Maximum DTC'),
-    h('div.group-panel', endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)))
+    h(
+      'div.group-panel',
+      endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)),
+    ),
+    h('div.meta-links', [
+      h(
+        'a',
+        {
+          attrs: {
+            href: endgames.url,
+          },
+        },
+        [h('span.icon.icon-code'), ' JSON'],
+      ),
+    ]),
   ];
 };
 
@@ -379,20 +397,29 @@ const about = (): VNode[] => {
   return [
     h('h2.panel', 'About'),
     h('div.panel', [
-      h('p', 'The op1 tablebase provides DTC information for 8-piece positions with at least one pair of opposed pawns (excluding positions where one side has just that single pawn).'),
-      h('p', 'DTC is the distance to conversion, i.e., the minimum number of moves until the next capture, promotion, or checkmate that maintains the outcome (win/loss). The 50-move rule is ignored.')
+      h(
+        'p',
+        'The op1 tablebase provides DTC information for 8-piece positions with at least one pair of opposed pawns (excluding positions where one side has just that single pawn).',
+      ),
+      h(
+        'p',
+        'DTC is the distance to conversion, i.e., the minimum number of moves until the next capture, promotion, or checkmate that maintains the outcome (win/loss). The 50-move rule is ignored.',
+      ),
     ]),
     h('h2.panel.secondary', 'Disclaimer'),
     h('div.panel', [
-      h('p', 'The tablebase lookup is provided on a best-effort basis, without guarantees of correctness or availability.'),
+      h(
+        'p',
+        'The tablebase lookup is provided on a best-effort basis, without guarantees of correctness or availability.',
+      ),
     ]),
     h('h2.panel.secondary', h('a', { attrs: { name: 'contact' } }, 'Contact')),
     h('div.panel', [
       h('p', 'Feedback and questions are welcome.'),
-      h('p', h('a', { attrs: { href: 'mailto:niklas.fiekas@backscattering.de' } }, 'niklas.fiekas@backscattering.de'))
-    ])
+      h('p', h('a', { attrs: { href: 'mailto:niklas.fiekas@backscattering.de' } }, 'niklas.fiekas@backscattering.de')),
+    ]),
   ];
-}
+};
 
 const layout = (ctrl: Ctrl, title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [

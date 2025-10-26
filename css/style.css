@@ -251,6 +251,9 @@ footer > .inner {
   margin: 10px 0;
 }
 
+.meta-links {
+  padding: 2px;
+}
 .meta-links a {
   margin-right: 0.5em;
 }

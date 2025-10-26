@@ -448,8 +448,8 @@ export class Ctrl {
     const normalized = normalizeMaterial(Material.fromBoard(this.setup.board));
     const url =
       this.getFen() === DEFAULT_FEN
-        ? '/endgames/index.json'
-        : `/endgames/${materialSideToString(normalized.white).toLowerCase()}${materialSideToString(normalized.black).toLowerCase()}.json`;
+        ? 'endgames/index.json'
+        : `endgames/${materialSideToString(normalized.white).toLowerCase()}${materialSideToString(normalized.black).toLowerCase()}.json`;
     if (this.endgames?.sync?.url === url) return this.endgames.sync;
 
     let res;

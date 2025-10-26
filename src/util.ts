@@ -30,7 +30,12 @@ export const shiftUp = (squares: SquareSet): SquareSet =>
     .union(squares.intersect(SquareSet.fromRank(7)).shr64(7 * 8));
 
 export const materialSideToString = (side: MaterialSide): string =>
-  strRepeat('K', side.king) + strRepeat('Q', side.queen) + strRepeat('R', side.rook) + strRepeat('B', side.bishop) + strRepeat('N', side.knight) + strRepeat('P', side.pawn);
+  strRepeat('K', side.king) +
+  strRepeat('Q', side.queen) +
+  strRepeat('R', side.rook) +
+  strRepeat('B', side.bishop) +
+  strRepeat('N', side.knight) +
+  strRepeat('P', side.pawn);
 
 const compareMaterialSide = (a: MaterialSide, b: MaterialSide): number => {
   if (a.size() !== b.size()) return a.size() - b.size();
