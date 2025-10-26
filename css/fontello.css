@@ -55,3 +55,21 @@ a:has(.icon) {
 .icon-graph:before {
   content: '\e808';
 }
+.icon-code:before {
+  content: '\ef121';
+}
+.icon-code:before {
+  content: '\f121';
+}
+.icon-down:before {
+  content: '\f175';
+}
+.icon-up:before {
+  content: '\f176';
+}
+.icon-left:before {
+  content: '\f177';
+}
+.icon-right:before {
+  content: '\f178';
+}

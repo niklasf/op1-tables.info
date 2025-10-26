@@ -220,7 +220,7 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
             href: ctrl.apiUrl(),
           },
         },
-        [h('span.icon.icon-download'), ' JSON'],
+        [h('span.icon.icon-code'), ' JSON'],
       ),
     ]),
   ];
