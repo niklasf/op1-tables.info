@@ -447,7 +447,7 @@ const layout = (ctrl: Ctrl, title: VNode, left: MaybeVNode[], right: MaybeVNode[
             'a',
             {
               attrs: {
-                href: 'https://github.com/lichess-org/op1-tables',
+                href: 'https://github.com/niklasf/op1-tables.info',
               },
             },
             'GitHub',
