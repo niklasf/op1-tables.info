@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "User interface to probe 8-piece op1 tablebase and statistics",
+  "license": "AGPL-3.0-or-later",
   "keywords": [
     "op1",
     "chess",
