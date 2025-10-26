@@ -203,7 +203,7 @@ export class Ctrl {
   push(setup: Setup, lastMove?: Move) {
     if ((this.setPosition(setup, lastMove) || this.about) && 'pushState' in history) {
       const fen = this.getFen();
-      history.pushState({ fen, lastMove }, '', '/?fen=' + fen.replace(/\s/g, '_'));
+      history.pushState({ fen, lastMove }, '', this.fenUrl(fen));
     }
     if (this.about) {
       this.about = false;
