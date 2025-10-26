@@ -1,8 +1,8 @@
 @font-face {
   font-family: 'fontello';
   src:
-    url('/fontello.woff2') format('woff2'),
-    url('/fontello.woff') format('woff');
+    url('fontello.woff2') format('woff2'),
+    url('fontello.woff') format('woff');
   font-display: block;
 }
 

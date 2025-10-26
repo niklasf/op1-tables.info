@@ -24,7 +24,7 @@ export const view = (ctrl: Ctrl): VNode => {
       'a',
       {
         attrs: {
-          href: '/',
+          href: '',
         },
         on: {
           click: primaryClick(() => ctrl.push(parseFen(DEFAULT_FEN).unwrap())),
