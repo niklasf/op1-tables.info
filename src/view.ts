@@ -6,6 +6,7 @@ import {
   DEFAULT_FEN,
   EnrichedTablebaseMove,
   TablebaseResponse,
+  Endgames,
   SimpleCategory,
   relaxedParseFen,
 } from './ctrl.js';
@@ -136,7 +137,10 @@ export const view = (ctrl: Ctrl): VNode => {
         ]),
       ),
     ],
-    ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : [spinner()],
+    [
+      ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
+      ctrl.tablebaseResponse.sync && ctrl.endgames.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : spinner(),
+    ]
   );
 };
 
@@ -182,9 +186,6 @@ const tablebaseResponse = (ctrl: Ctrl, res: TablebaseResponse): MaybeVNode[] => 
       : ctrl.setup.board.occupied.size() > 8
         ? h('p.panel', 'The tablebase only covers positions with up to 8 pieces.')
         : undefined,
-    ctrl.getFen() == DEFAULT_FEN
-      ? h('div.panel', [samplePosition(ctrl, 'R7/8/8/8/7q/2K1B2p/7P/2Bk4 w - - 0 1', 584)])
-      : undefined,
     ctrl.setup.board.occupied.size() == 8 && veryWeakSide
       ? h(
           'p.panel',
@@ -333,6 +334,10 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     },
     icon(i),
   );
+
+const sampleEndgames = (ctrl: Ctrl, endgames: Endgames): VNode => {
+  return h('div.panel', endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)))
+};
 
 const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
   const setup = parseFen(fen).unwrap();

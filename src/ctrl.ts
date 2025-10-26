@@ -36,6 +36,16 @@ export interface TablebaseResponse {
   moves: EnrichedTablebaseMove[];
 }
 
+export interface Endgame {
+  fen: string;
+  dtc: number;
+}
+
+export interface Endgames {
+  error?: TablebaseError;
+  endgames: Endgame[];
+}
+
 export interface TablebaseError {
   title: string;
   message: string;
@@ -53,14 +63,19 @@ export class Ctrl {
 
   private abortController: AbortController | undefined;
   public tablebaseResponse: Sync<TablebaseResponse>;
+  public endgames: Sync<Endgames>;
 
   constructor(private readonly redraw: () => void) {
     this.setup = relaxedParseFen(new URLSearchParams(location.search).get('fen')).unwrap(
       setup => setup,
       _ => parseFen(DEFAULT_FEN).unwrap(),
     );
-    this.tablebaseResponse = sync(this.fetchTablebase());
+
+    this.abortController = new AbortController();
+    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
     this.tablebaseResponse.promise.finally(() => this.redraw());
+    this.endgames = sync(this.fetchEndgames(this.abortController.signal));
+    this.endgames.promise.finally(() => this.redraw());
 
     window.addEventListener('popstate', event => {
       this.setPosition(
@@ -118,8 +133,14 @@ export class Ctrl {
     this.setup = setup;
     this.lastMove = lastMove;
     this.updateGround();
-    this.tablebaseResponse = sync(this.fetchTablebase());
+
+    this.abortController?.abort();
+    this.abortController = new AbortController();
+    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
     this.tablebaseResponse.promise.finally(() => this.redraw());
+    this.endgames = sync(this.fetchEndgames(this.abortController.signal));
+    this.endgames.promise.finally(() => this.redraw());
+
     this.redraw();
     return true;
   }
@@ -321,10 +342,7 @@ export class Ctrl {
     return '/?fen=' + fen.replace(/\s/g, '_');
   }
 
-  async fetchTablebase(): Promise<TablebaseResponse> {
-    this.abortController?.abort();
-    this.abortController = new AbortController();
-
+  private async fetchTablebase(signal: AbortSignal): Promise<TablebaseResponse> {
     const pos = Chess.fromSetup(this.setup);
     if (pos.isErr) {
       return {
@@ -358,7 +376,7 @@ export class Ctrl {
 
     let res;
     try {
-      res = await fetch(this.apiUrl(), { signal: this.abortController.signal });
+      res = await fetch(this.apiUrl(), { signal });
     } catch (error) {
       return {
         error: {
@@ -419,5 +437,37 @@ export class Ctrl {
         .sort((a, b) => (b.conversion ? 0 : b.dtc || 0) - (a.conversion ? 0 : a.dtc || 0))
         .sort((a, b) => SIMPLE_CATEGORIES.indexOf(b.simpleCategory) - SIMPLE_CATEGORIES.indexOf(a.simpleCategory)),
     };
+  }
+
+  private async fetchEndgames(signal: AbortSignal): Promise<Endgames> {
+    let res;
+    try {
+      res = await fetch('/endgames.json', {
+        signal,
+      });
+    } catch (error) {
+      return {
+        error: {
+          title: 'Network error',
+          message: error.message,
+          retry: true,
+        },
+        endgames: [],
+      };
+    }
+
+    if (!res.ok) {
+      return {
+        error: {
+          title: 'Transient error',
+          message: `Endgame request failed with HTTP ${res.status}`,
+          retry: true,
+        },
+        endgames: [],
+      };
+    }
+
+    const endgames: Endgame[] = await res.json();
+    return { endgames };
   }
 }
