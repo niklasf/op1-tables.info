@@ -139,7 +139,7 @@ export const view = (ctrl: Ctrl): VNode => {
     ],
     [
       ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
-      ctrl.tablebaseResponse.sync && ctrl.endgames.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : spinner(),
+      ...(ctrl.tablebaseResponse.sync && ctrl.endgames.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : [spinner()]),
     ]
   );
 };
@@ -235,7 +235,7 @@ const tablebaseMoves = (
   moves = moves.filter(move => move.simpleCategory === moveCategory);
   if (!moves.length) return;
   return h(
-    'div.moves',
+    'div.group-panel',
     moves.map(move => {
       const badges = [];
       if (move.category === 'unknown') badges.push(' ', h('badge.unknown', 'Unknown'));
@@ -335,8 +335,12 @@ const setupButton = (ctrl: Ctrl, setup: Setup, i: string, title: string): VNode 
     icon(i),
   );
 
-const sampleEndgames = (ctrl: Ctrl, endgames: Endgames): VNode => {
-  return h('div.panel', endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)))
+const sampleEndgames = (ctrl: Ctrl, endgames: Endgames): VNode[] => {
+  if (!endgames.endgames.length) return [];
+  return [
+    h('h2.panel.secondary', '8-piece endgames'),
+    h('div.group-panel', endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)))
+  ];
 };
 
 const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
@@ -344,7 +348,7 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
   const whiteWin = dtc > 0 !== (setup.turn === 'black');
   const material = Material.fromBoard(setup.board);
   return h(
-    'a.panel',
+    'a',
     {
       attrs: {
         href: ctrl.fenUrl(fen),

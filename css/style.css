@@ -62,6 +62,9 @@ h2 {
     border: 1px solid var(--border-color);
     border-radius: 4px;
 }
+.panel.secondary {
+    margin-top: 2rem;
+}
 
 a {
   color: var(--link);
@@ -91,13 +94,13 @@ a:visited {
   background-size: cover;
 }
 
-/* Moves */
+/* Moves and endgames */
 
-.moves {
+.group-panel {
   padding-bottom: 1rem;
 }
 
-.moves a {
+.group-panel a {
   display: block;
   border: 1px solid var(--border-color);
   color: var(--body-color);
@@ -105,17 +108,17 @@ a:visited {
   padding: 10px 15px;
   margin-bottom: -1px;
 }
-.moves a:active {
+.group-panel a:active {
   box-shadow: inset 0 var(--shadow-inset) 5px var(--shadow);
 }
-.moves a:hover {
+.group-panel a:hover {
   background: var(--secondary-bg-color);
 }
-.moves a:first-child {
+.group-panel a:first-child {
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
-.moves a:last-child {
+.group-panel a:last-child {
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
 }
@@ -133,7 +136,7 @@ badge {
   border: 1px solid var(--border-color);
   border-radius: 4px;
 }
-.moves badge + badge {
+.group-panel badge + badge {
   margin-right: 5px;
 }
 badge.draw {
@@ -149,6 +152,17 @@ badge.black {
   background-color: var(--black-bg-color);
   color: var(--black-color);
   ---border: 1px solid var(--black-color);
+}
+
+/* Endgames */
+
+span.black {
+    background: var(--black-bg-color);
+    color: var(--black-color);
+}
+span.white {
+    background: var(--white-bg-color);
+    color: var(--white-color);
 }
 
 /* Button group */
