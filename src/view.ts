@@ -380,7 +380,7 @@ const about = (): VNode[] => {
     h('h2.panel', 'About'),
     h('div.panel', [
       h('p', 'The op1 tablebase provides DTC information for 8-piece positions with at least one pair of opposed pawns (excluding positions where one side has just that single pawn).'),
-      h('p', 'DTC is the distance to conversion, i.e., the number of moves until the next capture, promotion, or checkmate. The 50-move rule is ignored.')
+      h('p', 'DTC is the distance to conversion, i.e., the minimum number of moves until the next capture, promotion, or checkmate that maintains the outcome (win/loss). The 50-move rule is ignored.')
     ]),
     h('h2.panel.secondary', 'Disclaimer'),
     h('div.panel', [
