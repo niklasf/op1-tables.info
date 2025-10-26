@@ -67,11 +67,7 @@ export class Ctrl {
       _ => parseFen(DEFAULT_FEN).unwrap(),
     );
 
-    this.abortController = new AbortController();
-    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
-    this.tablebaseResponse.promise.finally(() => this.redraw());
-    this.endgames = sync(this.fetchEndgames(this.abortController.signal));
-    this.endgames.promise.finally(() => this.redraw());
+    this.updatePosition();
 
     window.addEventListener('popstate', event => {
       this.setPosition(
@@ -129,13 +125,7 @@ export class Ctrl {
     this.setup = setup;
     this.lastMove = lastMove;
     this.updateGround();
-
-    this.abortController?.abort();
-    this.abortController = new AbortController();
-    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
-    this.tablebaseResponse.promise.finally(() => this.redraw());
-    this.endgames = sync(this.fetchEndgames(this.abortController.signal));
-    this.endgames.promise.finally(() => this.redraw());
+    this.updatePosition();
 
     this.redraw();
     return true;
@@ -159,6 +149,18 @@ export class Ctrl {
       });
     });
     this.updateAutoShapes();
+  }
+
+  private updatePosition() {
+    this.abortController?.abort();
+    this.abortController = new AbortController();
+    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
+    this.tablebaseResponse.promise.finally(() => this.redraw());
+    this.endgames = sync(this.fetchEndgames(this.abortController.signal));
+    this.endgames.promise.finally(() => this.redraw());
+
+    const material = Material.fromBoard(this.setup.board);
+    document.title = `${materialSideToString(material.white)}v${materialSideToString(material.black)} — Op1 endgame tablebase`;
   }
 
   private updateAutoShapes() {
