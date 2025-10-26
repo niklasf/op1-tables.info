@@ -49,6 +49,7 @@ export interface TablebaseError {
 }
 
 export class Ctrl {
+  public about = false;
   public setup: Setup;
   public lastMove: Move | undefined;
   public editMode = false;
@@ -61,11 +62,12 @@ export class Ctrl {
   public tablebaseResponse: Sync<TablebaseResponse>;
   public endgames?: Sync<EnrichedEndgames>;
 
-  constructor(private readonly redraw: () => void) {
+  constructor(readonly redraw: () => void) {
     this.setup = relaxedParseFen(new URLSearchParams(location.search).get('fen')).unwrap(
       setup => setup,
       _ => parseFen(DEFAULT_FEN).unwrap(),
     );
+    this.about = location.hash === '#about';
 
     this.updatePosition();
 
@@ -122,6 +124,7 @@ export class Ctrl {
 
   private setPosition(setup: Setup, lastMove?: Move): boolean {
     if (setupEquals(this.setup, setup)) return false;
+    this.about = false;
     this.setup = setup;
     this.lastMove = lastMove;
     this.updateGround();
@@ -198,9 +201,13 @@ export class Ctrl {
   }
 
   push(setup: Setup, lastMove?: Move) {
-    if (this.setPosition(setup, lastMove) && 'pushState' in history) {
+    if ((this.setPosition(setup, lastMove) || this.about) && 'pushState' in history) {
       const fen = this.getFen();
       history.pushState({ fen, lastMove }, '', '/?fen=' + fen.replace(/\s/g, '_'));
+    }
+    if (this.about) {
+      this.about = false;
+      this.redraw();
     }
   }
 

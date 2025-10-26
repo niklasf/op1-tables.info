@@ -13,13 +13,13 @@ import {
 import { capitalize, shiftRight, shiftUp, materialSideToString } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Material, Setup, setupEquals } from 'chessops/setup';
-import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
+import { EMPTY_BOARD_FEN, INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
 
 type MaybeVNode = VNode | string | undefined;
 
 export const view = (ctrl: Ctrl): VNode => {
-  return layout(
+  return layout(ctrl,
     h(
       'a',
       {
@@ -53,7 +53,7 @@ export const view = (ctrl: Ctrl): VNode => {
           insert: vnode =>
             ctrl.setGround(
               makeChessground(vnode.elm as HTMLElement, {
-                fen: DEFAULT_FEN,
+                fen: EMPTY_BOARD_FEN,
                 autoCastle: false,
                 trustAllEvents: true,
                 movable: {
@@ -143,6 +143,7 @@ export const view = (ctrl: Ctrl): VNode => {
         ]),
       ),
     ],
+    ctrl.about ? about() :
     [
       ...(ctrl.tablebaseResponse.sync ? tablebaseResponse(ctrl, ctrl.tablebaseResponse.sync) : []),
       ...(ctrl.tablebaseResponse.sync && ctrl.endgames?.sync ? sampleEndgames(ctrl, ctrl.endgames.sync) : [spinner()]),
@@ -374,7 +375,26 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
   );
 };
 
-const layout = (title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
+const about = (): VNode[] => {
+  return [
+    h('h2.panel', 'About'),
+    h('div.panel', [
+      h('p', 'The op1 tablebase provides DTC information for 8-piece positions with at least one pair of opposed pawns (excluding positions where one side has just that single pawn).'),
+      h('p', 'DTC is the distance to conversion, i.e., the number of moves until the next capture, promotion, or checkmate. The 50-move rule is ignored.')
+    ]),
+    h('h2.panel.secondary', 'Disclaimer'),
+    h('div.panel', [
+      h('p', 'The tablebase lookup is provided on a best-effort basis, without guarantees of correctness or availability.'),
+    ]),
+    h('h2.panel.secondary', h('a', { attrs: { name: 'contact' } }, 'Contact')),
+    h('div.panel', [
+      h('p', 'Feedback and questions are welcome.'),
+      h('p', h('a', { attrs: { href: 'mailto:niklas.fiekas@backscattering.de' } }, 'niklas.fiekas@backscattering.de'))
+    ])
+  ];
+}
+
+const layout = (ctrl: Ctrl, title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [
     h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
     h('div.right-side', [h('div.inner', right)]),
@@ -404,6 +424,22 @@ const layout = (title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode =>
               },
             },
             'GitHub',
+          ),
+          '. ',
+          h(
+            'a',
+            {
+              on: {
+                click: () => {
+                  ctrl.about = true;
+                  ctrl.redraw();
+                },
+              },
+              attrs: {
+                href: '#about',
+              },
+            },
+            'About',
           ),
           '.',
         ]),
