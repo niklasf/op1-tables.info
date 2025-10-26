@@ -10,7 +10,7 @@ import {
   SimpleCategory,
   relaxedParseFen,
 } from './ctrl.js';
-import { capitalize, strRepeat } from './util.js';
+import { capitalize, strRepeat, shiftLeft, shiftRight, shiftDown, shiftUp } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Material, Setup } from 'chessops/setup';
 import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
@@ -98,6 +98,12 @@ export const view = (ctrl: Ctrl): VNode => {
           setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
           setupButton(ctrl, transformSetup(ctrl.setup, flipHorizontal), 'horizontal', 'Mirror horizontally'),
           setupButton(ctrl, transformSetup(ctrl.setup, flipVertical), 'vertical', 'Mirror vertically'),
+        ]),
+        h('div.btn-group', [
+          //setupButton(ctrl, transformSetup(ctrl.setup, shiftLeft), 'left', 'Shift left'),
+          setupButton(ctrl, transformSetup(ctrl.setup, shiftRight), 'right', 'Shift right'),
+          //setupButton(ctrl, transformSetup(ctrl.setup, shiftDown), 'down', 'Shift down'),
+          setupButton(ctrl, transformSetup(ctrl.setup, shiftUp), 'up', 'Shift up'),
         ]),
       ]),
       h(
