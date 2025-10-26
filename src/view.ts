@@ -12,7 +12,7 @@ import {
 } from './ctrl.js';
 import { capitalize, shiftRight, shiftUp, materialSideToString } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
-import { Material, Setup } from 'chessops/setup';
+import { Material, Setup, setupEquals } from 'chessops/setup';
 import { INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
 
@@ -353,8 +353,9 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
   const setup = parseFen(fen).unwrap();
   const whiteWin = dtc > 0 !== (setup.turn === 'black');
   const material = Material.fromBoard(setup.board);
+  const active = setupEquals(setup, ctrl.setup);
   return h(
-    'a',
+    `a${active ? '.active' : ''}`,
     {
       attrs: {
         href: ctrl.fenUrl(fen),
