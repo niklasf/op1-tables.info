@@ -169,7 +169,6 @@ export class Ctrl {
   private updateAutoShapes() {
     this.withGround(ground => {
       const opposedPawn = this.opposedPawn();
-      console.log(this.promotionTargets('white'));
       ground.setAutoShapes([
         ...(this.hovering
           ? [
