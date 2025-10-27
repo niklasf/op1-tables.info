@@ -388,6 +388,7 @@ const samplePosition = (ctrl: Ctrl, endgame: Endgame): VNode => {
     [
       h('span.white', materialSideToString(material.white)),
       h('span.black', materialSideToString(material.black)),
+      endgame.p && h('span.p', { attrs: { title: 'Pawn file type' } }, `_${endgame.p}`),
       endgame.bp && h('span.bp', { attrs: { title: 'Bishop parity' } }, `_${endgame.bp}`),
       ' ',
       h(`badge.${whiteWin ? 'white' : 'black'}`, `DTC ${Math.abs(endgame.dtc)}`),

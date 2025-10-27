@@ -2,7 +2,8 @@
   "endgames": [
     {
       "fen": "KN6/8/k6p/8/8/7P/r6N/5N2 b - - 0 1",
-      "dtc": 17
+      "dtc": 17,
+      "p": "op1"
     }
   ]
 }

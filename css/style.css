@@ -12,8 +12,10 @@
 
   --border-color: #3d4851;
 
-  --draw-color: #fff;
-  --draw-bg-color: #757575;
+  --special-bg-color: #3730a3;
+
+  --neutral-color: #fff;
+  --neutral-bg-color: #757575;
 
   --white-bg-color: white;
   --white-color: black;
@@ -141,8 +143,8 @@ badge {
   margin-right: 5px;
 }
 badge.draw {
-  background-color: var(--draw-bg-color);
-  color: var(--draw-color);
+  background-color: var(--neutral-bg-color);
+  color: var(--neutral-color);
 }
 badge.white {
   background-color: var(--white-bg-color);
@@ -159,6 +161,7 @@ badge.black {
 
 span.white,
 span.black,
+span.p,
 span.bp {
   padding: 3px 7px;
   font-family: Monaco, Monospace;
@@ -174,12 +177,17 @@ span.black {
   background: var(--black-bg-color);
   color: var(--black-color);
 }
+span.p {
+  margin-left: -1px;
+  background: var(--special-bg-color);
+}
 span.bp {
   margin-left: -1px;
   background: var(--secondary-bg-color);
   color: var(--body-color);
 }
 span.black:last-of-type,
+span.p:last-of-type,
 span.bp:last-of-type {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
