@@ -18,6 +18,10 @@ const start = (element: Element) => {
   redraw();
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', () => {
+    start(document.body);
+  });
+} else {
   start(document.body);
-});
+}
