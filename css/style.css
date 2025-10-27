@@ -164,6 +164,8 @@ span.black,
 span.p,
 span.bp {
   padding: 3px 7px;
+  font-size: 12px;
+  line-height: 1;
   font-family: Monaco, Monospace;
 }
 span.white {
