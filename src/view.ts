@@ -423,8 +423,8 @@ const about = (): VNode[] => {
 
 const layout = (ctrl: Ctrl, title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [
-    h('div.left-side', [h('div.inner', [h('h1', [title]), ...left])]),
-    h('div.right-side', [h('div.inner', right)]),
+    h('nav', [h('div.inner', [h('h1', [title]), ...left])]),
+    h('main', [h('div.inner', right)]),
     h('footer', [
       h('div.inner', [
         h('p', [

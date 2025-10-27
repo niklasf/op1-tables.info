@@ -226,8 +226,8 @@ span.black {
 
 /* Layout: Base */
 
-.left-side > .inner,
-.right-side .inner,
+nav > .inner,
+main > .inner,
 footer > .inner {
   width: 310px;
   margin: auto;
@@ -238,12 +238,12 @@ footer > .inner {
   padding-top: 20px;
 }
 
-.left-side > .inner {
+nav > .inner {
   text-align: center;
 }
 
-.left-side > .inner,
-.right-side > .inner {
+nav > .inner,
+main > .inner {
   padding: 40px 0;
 }
 
@@ -260,7 +260,7 @@ footer > .inner {
 
 /* Single column */
 
-.left-side {
+nav {
   background: var(--body-bg-color)
     url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NjAiIGhlaWdodD0iODgwIj48Zz48cGF0aCBkPSJNNjYwIDQ0MEwzMzAgODgwIDAgNDQwVjBoNjYweiIgZmlsbD0iIzJhMzQzOSIvPjwvZz48L3N2Zz4=');
   background-position: center bottom;
@@ -269,26 +269,26 @@ footer > .inner {
 /* Two columns */
 
 @media (min-width: 680px) {
-  .left-side,
-  .right-side {
+  nav,
+  main {
     width: 50%;
   }
 
-  .left-side {
+  nav {
     top: 0;
     bottom: 0;
     position: fixed;
     background: none;
     background: var(--secondary-bg-color);
   }
-  .left-side > .inner {
+  nav > .inner {
     margin-right: 10%;
   }
 
-  .right-side {
+  main {
     margin-left: 50%;
   }
-  .right-side > .inner {
+  main > .inner {
     margin-left: 10%;
   }
 
@@ -314,8 +314,8 @@ footer > .inner {
   }
 }
 @media (min-width: 680px) and (max-height: 730px) {
-  .left-side > .inner,
-  .right-side > .inner {
+  nav > .inner,
+  main > .inner {
     padding: 10px 0;
   }
   h1 {
