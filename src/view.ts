@@ -15,6 +15,7 @@ import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Material, Setup, setupEquals } from 'chessops/setup';
 import { EMPTY_BOARD_FEN, INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
 import { flipHorizontal, flipVertical, transformSetup } from 'chessops/transform';
+import { Endgame } from './endgames.js';
 
 type MaybeVNode = VNode | string | undefined;
 
@@ -352,7 +353,7 @@ const sampleEndgames = (ctrl: Ctrl, endgames: EnrichedEndgames): VNode[] => {
     h('h2.panel.secondary', 'Maximum DTC'),
     h(
       'div.group-panel',
-      endgames.endgames.map(endgame => samplePosition(ctrl, endgame.fen, endgame.dtc)),
+      endgames.endgames.map(endgame => samplePosition(ctrl, endgame)),
     ),
     h('div.meta-links', [
       h(
@@ -368,17 +369,17 @@ const sampleEndgames = (ctrl: Ctrl, endgames: EnrichedEndgames): VNode[] => {
   ];
 };
 
-const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
-  const setup = parseFen(fen).unwrap();
-  const whiteWin = dtc > 0 !== (setup.turn === 'black');
+const samplePosition = (ctrl: Ctrl, endgame: Endgame): VNode => {
+  const setup = parseFen(endgame.fen).unwrap();
+  const whiteWin = endgame.dtc > 0 !== (setup.turn === 'black');
   const material = Material.fromBoard(setup.board);
   const active = setupEquals(setup, ctrl.setup);
   return h(
     `a${active ? '.active' : ''}`,
     {
       attrs: {
-        href: ctrl.fenUrl(fen),
-        title: fen,
+        href: ctrl.fenUrl(endgame.fen),
+        title: endgame.fen,
       },
       on: {
         click: primaryClick(() => ctrl.push(setup)),
@@ -387,8 +388,9 @@ const samplePosition = (ctrl: Ctrl, fen: string, dtc: number): VNode => {
     [
       h('span.white', materialSideToString(material.white)),
       h('span.black', materialSideToString(material.black)),
+      endgame.bp && h('span.bp', { attrs: { title: 'Bishop parity' } }, `_${endgame.bp}`),
       ' ',
-      h(`badge.${whiteWin ? 'white' : 'black'}`, `DTC ${Math.abs(dtc)}`),
+      h(`badge.${whiteWin ? 'white' : 'black'}`, `DTC ${Math.abs(endgame.dtc)}`),
     ],
   );
 };

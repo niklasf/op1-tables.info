@@ -158,7 +158,8 @@ badge.black {
 /* Endgames */
 
 span.white,
-span.black {
+span.black,
+span.bp {
   padding: 3px 7px;
   font-family: Monaco, Monospace;
 }
@@ -169,8 +170,17 @@ span.white {
   border-bottom-left-radius: 4px;
 }
 span.black {
+  margin-left: -1px;
   background: var(--black-bg-color);
   color: var(--black-color);
+}
+span.bp {
+  margin-left: -1px;
+  background: var(--secondary-bg-color);
+  color: var(--body-color);
+}
+span.black:last-of-type,
+span.bp:last-of-type {
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
 }
