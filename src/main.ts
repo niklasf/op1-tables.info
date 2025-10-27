@@ -16,6 +16,8 @@ const start = (element: Element) => {
   ctrl = new Ctrl(redraw);
 
   redraw();
+
+  console.log('op1-tables.info is free/libre open source software! https://github.com/niklasf/op1-tables.info');
 };
 
 if (document.readyState === 'loading') {
