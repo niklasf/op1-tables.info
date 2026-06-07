@@ -307,7 +307,7 @@ const sparePieces = (ctrl: Ctrl, color: Color, position: 'top' | 'bottom'): VNod
         ),
         ' ',
       ],
-      [],
+      [] as MaybeVNode[],
     ),
   );
 };

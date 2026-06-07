@@ -1,4 +1,5 @@
 import { Api as CgApi } from '@lichess-org/chessground/api';
+import { type Key as CgKey } from '@lichess-org/chessground/types';
 import { Piece, Move, SquareName, NormalMove, Color, COLORS } from 'chessops/types';
 import { Setup } from 'chessops/setup';
 import { defined, opposite, parseSquare, parseUci, makeSquare, squareFile, squareFromCoords } from 'chessops/util';
@@ -69,7 +70,7 @@ export class Ctrl {
     );
     this.about = location.hash === '#about';
 
-    this.updatePosition();
+    this.tablebaseResponse = this.updatePosition();
 
     window.addEventListener('popstate', event => {
       this.setPosition(
@@ -128,7 +129,7 @@ export class Ctrl {
     this.setup = setup;
     this.lastMove = lastMove;
     this.updateGround();
-    this.updatePosition();
+    this.tablebaseResponse = this.updatePosition();
 
     this.redraw();
     return true;
@@ -154,16 +155,18 @@ export class Ctrl {
     this.updateAutoShapes();
   }
 
-  private updatePosition() {
+  private updatePosition(): Sync<TablebaseResponse> {
     this.abortController?.abort();
     this.abortController = new AbortController();
-    this.tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
-    this.tablebaseResponse.promise.finally(() => this.redraw());
+    const tablebaseResponse = sync(this.fetchTablebase(this.abortController.signal));
+    tablebaseResponse.promise.finally(() => this.redraw());
     this.endgames = sync(this.fetchEndgames(this.abortController.signal));
     this.endgames.promise.finally(() => this.redraw());
 
     const material = Material.fromBoard(this.setup.board);
     document.title = `${materialSideToString(material.white)}v${materialSideToString(material.black)} — Op1 endgame tablebase`;
+
+    return tablebaseResponse;
   }
 
   private updateAutoShapes() {
@@ -234,15 +237,15 @@ export class Ctrl {
     return this.lastMove && chessgroundMove(this.lastMove);
   }
 
-  onCgMove(from: SquareName, to: SquareName) {
-    if (!this.editMode)
+  onCgMove(from: CgKey, to: CgKey) {
+    if (!this.editMode && from != 'a0' && to != 'a0')
       this.pushMove({
         from: parseSquare(from),
         to: parseSquare(to),
       });
   }
 
-  onCgDropNewPiece(piece: Piece, square: SquareName) {
+  onCgDropNewPiece(piece: Piece, square: CgKey) {
     if (piece.role === 'king') {
       // Move the existing king when dropping a new one.
       this.withGround(ground => {
@@ -385,7 +388,7 @@ export class Ctrl {
       return {
         error: {
           title: 'Network error',
-          message: error.message,
+          message: (error as Error).message,
           retry: true,
         },
         moves: [],
@@ -459,7 +462,7 @@ export class Ctrl {
         url: '',
         error: {
           title: 'Network error',
-          message: error.message,
+          message: (error as Error).message,
           retry: true,
         },
         endgames: [],
