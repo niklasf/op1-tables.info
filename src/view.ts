@@ -408,6 +408,10 @@ const about = (): VNode[] => {
         'p',
         'DTC is the distance to conversion, i.e., the minimum number of moves until the next capture, promotion, or checkmate that maintains the outcome (win/loss). The 50-move rule is ignored.',
       ),
+      h(
+        'p',
+        ['See the ', h('a', {attrs:{href:'https://lichess.org/@/Lichess/blog/op1-partial-8-piece-tablebase-available/1ptPBDpC'}}, 'announcement blog post'), ' for details.'],
+      )
     ]),
     h('h2.panel.secondary', 'Disclaimer'),
     h('div.panel', [
