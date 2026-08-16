@@ -23,12 +23,12 @@
   "dependencies": {
     "@badrap/result": "^0.3.1",
     "@lichess-org/chessground": "^10.1.1",
-    "chessops": "^0.15.0",
-    "snabbdom": "^3.6.3"
+    "chessops": "^0.15.1",
+    "snabbdom": "^3.6.4"
   },
   "devDependencies": {
-    "esbuild": "^0.28.0",
-    "prettier": "^3.6.2",
+    "esbuild": "^0.28.2",
+    "prettier": "^3.9.6",
     "typescript": "^6.0.3"
   },
   "scripts": {
