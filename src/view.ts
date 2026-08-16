@@ -10,7 +10,7 @@ import {
   relaxedParseFen,
   EnrichedEndgames,
 } from './ctrl.js';
-import { capitalize, shiftRight, shiftUp, materialSideToString } from './util.js';
+import { capitalize, shiftRight, shiftUp, shiftLeft, shiftDown, materialSideToString } from './util.js';
 import { Color, opposite, parseUci, ROLES, NormalMove } from 'chessops';
 import { Material, Setup, setupEquals } from 'chessops/setup';
 import { EMPTY_BOARD_FEN, INITIAL_FEN, makeFen, parseFen } from 'chessops/fen';
@@ -102,9 +102,9 @@ export const view = (ctrl: Ctrl): VNode => {
           setupButton(ctrl, transformSetup(ctrl.setup, flipVertical), 'vertical', 'Mirror vertically'),
         ]),
         h('div.btn-group', [
-          //setupButton(ctrl, transformSetup(ctrl.setup, shiftLeft), 'left', 'Shift left'),
+          setupButton(ctrl, transformSetup(ctrl.setup, shiftLeft), 'left', 'Shift left'),
           setupButton(ctrl, transformSetup(ctrl.setup, shiftRight), 'right', 'Shift right'),
-          //setupButton(ctrl, transformSetup(ctrl.setup, shiftDown), 'down', 'Shift down'),
+          setupButton(ctrl, transformSetup(ctrl.setup, shiftDown), 'down', 'Shift down'),
           setupButton(ctrl, transformSetup(ctrl.setup, shiftUp), 'up', 'Shift up'),
         ]),
       ]),
@@ -408,10 +408,15 @@ const about = (): VNode[] => {
         'p',
         'DTC is the distance to conversion, i.e., the minimum number of moves until the next capture, promotion, or checkmate that maintains the outcome (win/loss). The 50-move rule is ignored.',
       ),
-      h(
-        'p',
-        ['See the ', h('a', {attrs:{href:'https://lichess.org/@/Lichess/blog/op1-partial-8-piece-tablebase-available/1ptPBDpC'}}, 'announcement blog post'), ' for details.'],
-      )
+      h('p', [
+        'See the ',
+        h(
+          'a',
+          { attrs: { href: 'https://lichess.org/@/Lichess/blog/op1-partial-8-piece-tablebase-available/1ptPBDpC' } },
+          'announcement blog post',
+        ),
+        ' for details.',
+      ]),
     ]),
     h('h2.panel.secondary', 'Disclaimer'),
     h('div.panel', [
