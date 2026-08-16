@@ -78,8 +78,8 @@ a:visited {
 /* Board */
 
 .cg-wrap {
-  width: 296px;
-  height: 296px;
+  width: 312px;
+  height: 312px;
   margin: 0 auto;
   background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOng9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0iZ2VvbWV0cmljUHJlY2lzaW9uIj48cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjOTJhNWFlIi8+PGcgaWQ9ImEiPjxnIGlkPSJiIj48ZyBpZD0iYyI+PGcgaWQ9ImQiPjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiNkZWUzZTYiIGlkPSJlIi8+PHVzZSB4PSIyIiBocmVmPSIjZSIgeDpocmVmPSIjZSIvPjwvZz48dXNlIHg9IjQiIGhyZWY9IiNkIiB4OmhyZWY9IiNkIi8+PC9nPjx1c2UgeD0iMSIgeT0iMSIgaHJlZj0iI2MiIHg6aHJlZj0iI2MiLz48L2c+PHVzZSB5PSIyIiBocmVmPSIjYiIgeDpocmVmPSIjYiIvPjwvZz48dXNlIHk9IjQiIGhyZWY9IiNhIiB4OmhyZWY9IiNhIi8+PC9zdmc+');
 }
@@ -249,7 +249,7 @@ span.bp:last-of-type {
 nav > .inner,
 main > .inner,
 footer > .inner {
-  width: 310px;
+  width: 320px;
   margin: auto;
 }
 
@@ -288,7 +288,7 @@ nav {
 
 /* Two columns */
 
-@media (min-width: 680px) {
+@media (min-width: 720px) {
   nav,
   main {
     width: 50%;

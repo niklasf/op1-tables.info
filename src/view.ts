@@ -36,6 +36,14 @@ export const view = (ctrl: Ctrl): VNode => {
     ),
     [
       h('div#stm-toolbar', [
+        h(
+          'div.btn-group',
+          h(
+            `button.btn${ctrl.flipped ? '.active' : ''}`,
+            { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } },
+            icon('rotate'),
+          ),
+        ),
         h('div.btn-group', [turnButton(ctrl, 'white'), turnButton(ctrl, 'black')]),
         h(
           'div.btn-group',
@@ -87,14 +95,6 @@ export const view = (ctrl: Ctrl): VNode => {
       }),
       sparePieces(ctrl, ctrl.flipped ? 'black' : 'white', 'bottom'),
       h('div#board-toolbar', [
-        h(
-          'div.btn-group',
-          h(
-            `button.btn${ctrl.flipped ? '.active' : ''}`,
-            { attrs: { title: 'Flip board (f)' }, on: { click: () => ctrl.toggleFlipped() } },
-            icon('rotate'),
-          ),
-        ),
         h('div.btn-group', setupButton(ctrl, ctrl.clearedBoardSetup(), 'eraser', 'Clear board')),
         h('div.btn-group', [
           setupButton(ctrl, ctrl.swappedColorsSetup(), 'black-white', 'Swap colors'),
