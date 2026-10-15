@@ -435,6 +435,16 @@ const about = (): VNode[] => {
 
 const layout = (ctrl: Ctrl, title: VNode, left: MaybeVNode[], right: MaybeVNode[]): VNode => {
   return h('body', [
+    h(
+      'div',
+      {
+        attrs: {
+          style:
+            'background:#c00;color:#fff;text-align:center;font-weight:bold;position:fixed;z-index:1;width:100%;top:0;',
+        },
+      },
+      'Careful, investigating internal inconsistencies',
+    ),
     h('nav', [h('div.inner', [h('h1', [title]), ...left])]),
     h('main', [h('div.inner', right)]),
     h('footer', [
